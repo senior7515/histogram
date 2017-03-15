@@ -10,8 +10,8 @@
 #include <boost/iostreams/concepts.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
 #include <boost/python.hpp>
 #include <boost/assert.hpp>
 #include <iosfwd>
@@ -47,9 +47,11 @@ public:
             len_ = n;
         } else {
             if (pos_ + n > len_) {
-                len_ = pos_ + n; 
-                if (_PyBytes_Resize(pstr_, len_) == -1)
+                len_ = pos_ + n;
+                if (_PyBytes_Resize(pstr_, len_) == -1) {
+                    PyErr_SetString(PyExc_RuntimeError, "cannot allocate memory");
                     python::throw_error_already_set();
+                }
             }
             char* b = PyBytes_AS_STRING(*pstr_);
             std::copy(s, s + n, b + pos_);
@@ -73,7 +75,7 @@ struct serialization_suite : python::pickle_suite
     {
         PyObject* pobj = 0;
         iostreams::stream<detail::python_bytes_sink> os(&pobj);
-        archive::text_oarchive oa(os);
+        archive::binary_oarchive oa(os);
         oa << python::extract<const T&>(obj)();
         os.flush();
         return python::make_tuple(obj.attr("__dict__"),
@@ -98,7 +100,7 @@ struct serialization_suite : python::pickle_suite
         python::object o = state[1];
         iostreams::stream<iostreams::array_source>
             is(PyBytes_AS_STRING(o.ptr()), PyBytes_Size(o.ptr()));
-        archive::text_iarchive ia(is);
+        archive::binary_iarchive ia(is);
         ia >> python::extract<T&>(obj)();
     }
 

@@ -40,7 +40,7 @@ namespace {
   template <typename Axes1, typename Axes2>
   inline void copy_axes(const Axes1 src, Axes2& dst) {
       axes_init(dst, src.size());
-      std::copy(src.begin(), src.end(), dst.begin());    
+      std::copy(src.begin(), src.end(), dst.begin());
   }
 
   struct linearize : public static_visitor<void>
@@ -85,6 +85,9 @@ namespace {
 template <typename Axes, typename Storage = dynamic_storage>
 class histogram_common {
 public:
+  /// Whether histogram is in empty (no axes) default constructed state
+  bool empty() const { return axes_.empty(); }
+
   /// Number of axes (dimensions) of histogram
   unsigned dim() const { return axes_.size(); }
 
@@ -210,10 +213,10 @@ protected:
   }
   template <typename Last>
   double windex_impl(linearize_x&, Last w) const
-  { 
+  {
     static_assert(std::is_convertible<Last, double>::value,
                   "argument not convertible to double");
-    return w; 
+    return w;
   } // stop recursion
 
   template <typename First, typename... Rest>
@@ -223,7 +226,7 @@ protected:
                   "argument not convertible to integer");
     lin.in = first;
     apply_visitor(lin, axes_[dim() - sizeof...(Rest) - 1]);
-    index_impl(lin, rest...);      
+    index_impl(lin, rest...);
   }
   void index_impl(linearize&) const {} // stop recursion
 };
@@ -291,7 +294,7 @@ public:
     base_t::axes_ = std::move(other.axes_);
     base_t::storage_ = std::move(other.storage_);
     return *this;
-  } 
+  }
 
   template <typename OtherStoragePolicy>
   histogram& operator=(histogram<Dynamic, OtherStoragePolicy>&& other)
@@ -301,7 +304,7 @@ public:
     std::copy(other.axes_.begin(), other.axes_.end(), base_t::axes_.begin());
     base_t::storage_ = std::move(other.storage_);
     return *this;
-  } 
+  }
 
   template <typename... Args>
   void fill(Args... args)
@@ -367,7 +370,7 @@ public:
   histogram& operator+=(const histogram<OtherDim, OtherStoragePolicy>& other)
   {
     static_assert((OtherDim == Dim) || OtherDim == Dynamic,
-                  "dimensions incompatible"); 
+                  "dimensions incompatible");
     if (base_t::dim() != other.dim())
       throw std::logic_error("dimensions of histograms differ");
     if (base_t::size() != other.size())
@@ -441,7 +444,7 @@ public:
     copy_axes(other.axes_, base_t::axes_);
     base_t::storage_ = std::move(other.storage_);
     return *this;
-  } 
+  }
 
   template <typename OtherStoragePolicy>
   histogram& operator=(histogram<Dynamic, OtherStoragePolicy>&& other)
@@ -449,7 +452,7 @@ public:
     base_t::axes_ = std::move(other.axes_);
     base_t::storage_ = std::move(other.storage_);
     return *this;
-  } 
+  }
 
   template <typename... Axes>
   histogram(Axes... axes)
