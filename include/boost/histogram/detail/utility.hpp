@@ -8,6 +8,7 @@
 #define _BOOST_HISTOGRAM_DETAIL_UTILITY_HPP_
 
 #include <string>
+#include <sstream>
 #include <cstdlib>
 #include <cstddef>
 #include <cstring>
@@ -16,6 +17,24 @@
 namespace boost {
 namespace histogram {
 namespace detail {
+
+    template <typename... Args>
+    inline
+    std::string msg(const Args... args) {
+        std::ostringstream os;
+        msg_(os, args...);
+        return os.str();
+    }
+
+    template <typename First, typename... Rest>
+    inline
+    void msg_(std::ostringstream& os, const First& a, const Rest... rest) {
+        os << a;
+        msg_(os, rest...);
+    }
+
+    inline
+    void msg_(std::ostringstream& os) {}
 
     inline
     std::string escape(const std::string& s) {

@@ -11,6 +11,7 @@
 #include <boost/assert.hpp>
 #include <boost/variant/static_visitor.hpp>
 #include <boost/histogram/axis.hpp>
+#include <boost/histogram/axis_ostream_operators.hpp>
 #include <boost/histogram/visitors.hpp>
 #include <boost/histogram/static_storage.hpp>
 #include <boost/histogram/dynamic_storage.hpp>
@@ -465,7 +466,7 @@ public:
   void fill(Args... args)
   {
     BOOST_ASSERT_MSG(sizeof...(args) == base_t::dim(),
-                     "number of arguments does not match histogram dimension");
+      "number of arguments does not match histogram dimension");
     linearize_x lin;
     base_t::index_impl(lin, args...);
     if (lin.stride)
@@ -610,6 +611,25 @@ public:
 
   template <class Archive>
   friend void serialize(Archive&, histogram&, unsigned);
+
+  struct axis_ostream_visitor : static_visitor<void> {
+    std::ostream &os_;
+    explicit axis_ostream_visitor(std::ostream &os) : os_(os) {}
+    template <typename Axis> void operator()(const Axis &a) const {
+      os_ << "\n  " << a << ",";
+    }
+  };
+
+  friend inline std::ostream &operator<<(std::ostream &os,
+                                         const histogram &h) {
+    os << "histogram(";
+    axis_ostream_visitor sh(os);
+    for (auto it = base_t::axes_.begin(); it != base_t::axes_.end(); ++it) {
+      apply_visitor(sh, *it);
+      os << (h.dim() ? "\n)" : ")");
+    }
+    return os;
+  }
 };
 
 
