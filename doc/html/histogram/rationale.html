@@ -35,7 +35,7 @@
 <dt><span class="section"><a href="rationale.html#histogram.rationale.storage_types">Storage types</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.uoflow">Under- and overflow bins</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.variance">Variance estimates</a></span></dt>
-<dt><span class="section"><a href="rationale.html#histogram.rationale.weights">Support of weighted increments</a></span></dt>
+<dt><span class="section"><a href="rationale.html#histogram.rationale.weights">Support of weighted fills</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.python_support">Python support</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.serialization">Serialization</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.comparison_to_boost_accumulators">Comparison
@@ -209,21 +209,21 @@
         is of the random-access variety, and may be happening in a tight loop. The
         builtin storage types therefore implement dense storage of bin counters.
         <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">boost::histogram::array_storage</a></code>
-        implements a simple storage based on a heap-allocated array. That could be
-        the end of story, but there are some issues with this approach. It is not
-        convenient, because the user has to decide what (integral) type to use to
-        hold the bin counts and it is not an obvious choice. The integer needs to
-        be large enough to avoid counter overflow, but only a fraction of the bits
-        are used if it is too large. Then it is a waste of memory. This is still
-        a concern since the performance of modern CPUs requires frequent use of the
-        CPU cache, which is small. Using floating point numbers is similarly dangerous.
-        They don't overflow, but cap the bin count when the bits in the mantissa
-        are used up.
+        implements a simple storage based on a heap-allocated array of a static counter
+        type. That could be the end of story, but there are some issues with this
+        approach. It is not convenient, because the user has to decide what type
+        to use to hold the bin counts and it is not an obvious choice. An integer
+        type needs to be large enough to avoid counter overflow, but only a fraction
+        of the bits are used if it is too large. Using an integral type that is too
+        large is a waste of memory. This is still a concern today since the performance
+        of modern CPUs depends on effective utilization of the CPU cache, which is
+        small. Using floating point numbers is similarly dangerous. They don't overflow,
+        but cap the bin count when the bits in the mantissa are used up.
       </p>
 <p>
         The standard storage used in the library is <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class adaptive_storage">boost::histogram::adaptive_storage</a></code>,
-        which solves these issues with dynamic memory management, based on the following
-        insight. The <a href="https://en.wikipedia.org/wiki/Curse_of_dimensionality" target="_top">curse
+        which solves these issues with a dynamic counter type management, based on
+        the following insight. The <a href="https://en.wikipedia.org/wiki/Curse_of_dimensionality" target="_top">curse
         of dimensionality</a> makes the total number of bins grow very fast as
         the dimension of the histogram grows. However, having many bins also reduces
         the number of counts per bin, since the input values are spread over many
@@ -235,8 +235,8 @@
         overflow, we switch to the next larger integer type. We start with 1 byte
         per bin counter and then double the size as needed, until 8 byte per bin
         are reached. The following images illustrate this progression for a storage
-        of 3 bin counters. Note, that always a new memory block is allocated for
-        all counters, when one of them hits its capacity limit.
+        of 3 bin counters. A new memory block is allocated for all counters, when
+        the first one of them hits its capacity limit.
       </p>
 <p>
         <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint8.svg" width="65" height="23"></object></span>
@@ -259,12 +259,12 @@
         <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_cpp_int.svg" width="511" height="23"></object></span>
       </p>
 <p>
-        This approach is not only memory conserving, but also ultimately safe, because
-        bin counters cannot overflow.
+        This approach is not only memory conserving, but also allows us to give the
+        strong guarantee that bin counters cannot overflow.
       </p>
 <p>
         And now comes the best part: this approach is even faster in the multi-dimensional
-        case despite the overheads involved in handling the storage dynamically.
+        case despite the run-time overheads of handling the counter type dynamically.
         The benchmarks show, that the gains from better cache usage outweigh the
         run-time overheads of dynamic dispatching to the right bin counter type and
         the additional allocation costs. Doubling the size of the bin counters each
@@ -328,20 +328,20 @@
 <a name="histogram.rationale.variance"></a><a class="link" href="rationale.html#histogram.rationale.variance" title="Variance estimates">Variance estimates</a>
 </h3></div></div></div>
 <p>
-        Once a histogram is filled, the count <span class="emphasis"><em>k</em></span> in a bin can
-        be queried with the <code class="computeroutput"><span class="identifier">value</span><span class="special">(...)</span></code> method. The histogram also offers a
-        <code class="computeroutput"><span class="identifier">variance</span><span class="special">(...)</span></code>
-        method, which returns an estimate of the <a href="https://en.wikipedia.org/wiki/Variance" target="_top">variance</a>
-        <span class="emphasis"><em>v</em></span> of that count.
+        Once a histogram is filled, the bin counter can be accessed with the <code class="computeroutput"><span class="identifier">bin</span><span class="special">(...)</span></code>
+        method. The standard counter type has a <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code> method to return the count <span class="emphasis"><em>k</em></span>.
+        It also offers a <code class="computeroutput"><span class="identifier">variance</span><span class="special">()</span></code> method, which returns an estimate <span class="emphasis"><em>v</em></span>
+        of the <a href="https://en.wikipedia.org/wiki/Variance" target="_top">variance</a>
+        of that count.
       </p>
 <p>
         If the input values for the histogram come from a <a href="https://en.wikipedia.org/wiki/Stochastic_process" target="_top">stochastic
         process</a>, the variance provides useful additional information. Examples
         for a stochastic process are a physics experiment or a random person filling
         out a questionaire<a href="#ftn.histogram.rationale.variance.f0" class="footnote" name="histogram.rationale.variance.f0"><sup class="footnote">[3]</sup></a>. The variance <span class="emphasis"><em>v</em></span> is the square of the <a href="https://en.wikipedia.org/wiki/Standard_deviation" target="_top">standard deviation</a>.
-        The standard deviation in a bin tells us how much we can expect the observed
-        value to fluctuate if we or someone else would repeat our experiment with
-        new random input.
+        The standard deviation is a number that tells us how much we can expect the
+        observed value to fluctuate if we or someone else would repeat our experiment
+        with new random input.
       </p>
 <p>
         Variance estimates are useful in many ways:
@@ -385,8 +385,8 @@
         = v1 + v2</em></span>. This is not true for standard deviations, where the
         addition law is more complex <span class="emphasis"><em>s3 = sqrt(s1^2 + s2^2)</em></span>.
         In that sense, the variance is more straight-forward to use during data processing.
-        It is also obviously more efficient. The user can take the square-root at
-        the end of the processing obtain the standard deviation as needed.
+        It is also more efficient for the same reason. The user can take the square-root
+        at the end of the processing obtain the standard deviation as needed.
       </p>
 <p>
         How is the variance estimate <span class="emphasis"><em>v</em></span> computed? If we know
@@ -405,20 +405,19 @@
         the inputs (or want to feign ignorance about it).
       </p>
 <p>
-        Now, if the value returned by the method <code class="computeroutput"><span class="identifier">variance</span><span class="special">(...)</span></code> is just the same as the value return
-        by <code class="computeroutput"><span class="identifier">value</span><span class="special">(...)</span></code>,
-        why bother with adding a <code class="computeroutput"><span class="identifier">variance</span><span class="special">(...)</span></code> method, except perhaps for convenience?
-        There is another reason, which becomes apparent if the histograms are filled
-        with weighted counts, which is discussed next.
+        Now, if the number returned by the <code class="computeroutput"><span class="identifier">variance</span><span class="special">()</span></code> method is just the same as the number return
+        by <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code>
+        method, why bother with adding a <code class="computeroutput"><span class="identifier">variance</span><span class="special">()</span></code> method? There is a reason, which becomes
+        apparent if the histograms are filled with weights, which is discussed next.
       </p>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="histogram.rationale.weights"></a><a class="link" href="rationale.html#histogram.rationale.weights" title="Support of weighted increments">Support of weighted increments</a>
+<a name="histogram.rationale.weights"></a><a class="link" href="rationale.html#histogram.rationale.weights" title="Support of weighted fills">Support of weighted fills</a>
 </h3></div></div></div>
 <p>
-        A histogram categorizes input values and increments a bin counter if an input
-        value falls into the value range covered by that bin. The <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class adaptive_storage">standard
+        A histogram sorts input values into bins and increments a bin counter if
+        an input value falls into the range covered by that bin. The <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class adaptive_storage">standard
         storage</a></code> uses integer types to store these counts, see the <a class="link" href="rationale.html#histogram.rationale.storage_types" title="Storage types">storage section</a> how integer
         overflow is avoided. However, sometimes histograms need to be filled with
         values that have a weight <span class="emphasis"><em>w</em></span> attached to them. In this
@@ -447,8 +446,10 @@
         of using weighted fills can be made at run-time. If the call <code class="computeroutput"><span class="identifier">fill</span><span class="special">(...,</span> <span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">))</span></code> is
         used, two doubles per bin are stored (previous integer counts are automatically
         converted). The first double keeps track of the sum of weights. The second
-        double keeps track of the sum of weights squared. The latter is the variance
-        estimate in this case and returned by a call to <code class="computeroutput"><span class="identifier">variance</span><span class="special">(...)</span></code>.
+        double keeps track of the sum of weights squared, which is the variance estimate
+        in this case. The former is accessed with the <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code> method of the bin counter, and the latter
+        with the <code class="computeroutput"><span class="identifier">variance</span><span class="special">()</span></code>
+        method.
       </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
@@ -456,10 +457,11 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-          This variance estimate can be derived from the <a href="https://en.wikipedia.org/wiki/Variance#Properties" target="_top">mathematical
+          Why the sum of weights squared is the variance estimate can be derived
+          from the <a href="https://en.wikipedia.org/wiki/Variance#Properties" target="_top">mathematical
           properties of the variance</a>. Let us say a bin is filled <span class="emphasis"><em>k1</em></span>
-          times with weight <span class="emphasis"><em>w1</em></span>. The sum of weights is then
-          <span class="emphasis"><em>w1 k1</em></span>. It then follows from the variance properties
+          times with a fixed weight <span class="emphasis"><em>w1</em></span>. The sum of weights is
+          then <span class="emphasis"><em>w1 k1</em></span>. It then follows from the variance properties
           that <span class="emphasis"><em>Var(w1 k1) = w1^2 Var(k1)</em></span>. Using the reasoning
           from before, the estimated variance of <span class="emphasis"><em>k1</em></span> is <span class="emphasis"><em>k1</em></span>,
           so that <span class="emphasis"><em>Var(w1 k1) = w1^2 Var(k1) = w1^2 k1</em></span>. Variances
