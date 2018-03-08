@@ -21,11 +21,19 @@ if(${CMAKE_BUILD_TYPE})
   STRING(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
 endif()
 
-if(MSVC)
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
   add_definitions(/W3)
-else()
-  # -fpermissive needed for cpp_int in gcc-6
-  add_definitions(-Wall -fpermissive)
+endif()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  add_definitions(-Wall)
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6)
+    # -fpermissive needed for cpp_int in gcc-6
+    # -Wno-noexcept-type to silence warnings related to Boost.Python
+    add_definitions(-fpermissive -Wno-noexcept-type)
+  endif()
+endif()
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  add_definitions(-Wall)
 endif()
 
 if(TRACE_ALLOCS)
@@ -35,23 +43,32 @@ endif()
 if(BUILD_PYTHON)
   if(DEFINED PYTHON_VERSION)
     find_package(PythonLibs ${PYTHON_VERSION} EXACT REQUIRED)
-    find_package(PythonInterp ${PYTHON_VERSION} EXACT REQUIRED) # used by python_suite_test
   else()
     find_package(PythonLibs REQUIRED)
-    find_package(PythonInterp REQUIRED) # used by python_suite_test
   endif()
 
-  message(STATUS "Python lib: ${PYTHON_LIBRARIES}")
+  message(STATUS "Python lib: ${PYTHON_LIBRARIES} (MUST match what Boost.Python was compiled against)")
   message(STATUS "Python include: ${PYTHON_INCLUDE_DIRS}")
   include_directories(${PYTHON_INCLUDE_DIRS})
 
+  # used by python_suite_test, version is matched with PythonLibs
+  # automatically in cmake-3.9.6, but this seems not to be the case in older
+  # cmake versions
+  find_package(PythonInterp ${PYTHONLIBS_VERSION_STRING} EXACT REQUIRED)
+
+  if (PYTHON_VERSION_MAJOR EQUAL 3)
+    set(BOOST_PYTHON_NAME python3)
+  else()
+    set(BOOST_PYTHON_NAME python)
+  endif()
+
   if(BUILD_NUMPY_SUPPORT)
-    find_package(Boost 1.55 REQUIRED
-                 COMPONENTS iostreams serialization python numpy)
+    find_package(Boost 1.63 REQUIRED
+                 COMPONENTS iostreams serialization ${BOOST_PYTHON_NAME} numpy)
     add_definitions(-DHAVE_NUMPY)
   else()
-    find_package(Boost 1.55 REQUIRED
-                 COMPONENTS iostreams serialization python)
+    find_package(Boost 1.63
+                 COMPONENTS iostreams serialization ${BOOST_PYTHON_NAME})
   endif()
 
   add_library(histogram SHARED
@@ -59,12 +76,11 @@ if(BUILD_PYTHON)
     ../src/python/axis.cpp
     ../src/python/histogram.cpp
   )
-
   set(LIBRARIES ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
   target_link_libraries(histogram ${LIBRARIES})
   set_target_properties(histogram PROPERTIES PREFIX "" SUFFIX ".so")
 else()
-  find_package(Boost 1.55 REQUIRED
+  find_package(Boost 1.63 REQUIRED
                COMPONENTS serialization)
   set(LIBRARIES ${Boost_LIBRARIES})
 endif()
@@ -94,7 +110,7 @@ else()
 endif()
 
 # sync examples in documentation with example folder
-add_custom_target(sync_examples ALL COMMAND python ../doc/sync_code.py)
+add_custom_target(sync_examples ALL COMMAND python ${PROJECT_SOURCE_DIR}/../doc/sync_code.py)
 
 # checks
 if(BUILD_CHECKS)

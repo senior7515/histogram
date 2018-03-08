@@ -1,4 +1,4 @@
-// Copyright 2015-2016 Hans Dembinski
+// Copyright 2015-2017 Hans Dembinski
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt
@@ -8,12 +8,12 @@
 #include <boost/fusion/container/generation/make_vector.hpp>
 #include <boost/fusion/include/make_vector.hpp>
 #include <boost/fusion/include/vector.hpp>
-#include <boost/histogram/axis/axis.hpp>
 #include <boost/histogram/axis/any.hpp>
-#include <boost/histogram/histogram_fwd.hpp>
+#include <boost/histogram/axis/axis.hpp>
 #include <boost/histogram/axis/ostream_operators.hpp>
 #include <boost/histogram/detail/axis_visitor.hpp>
 #include <boost/histogram/detail/utility.hpp>
+#include <boost/histogram/histogram_fwd.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/variant.hpp>
 #include <limits>

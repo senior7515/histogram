@@ -1,4 +1,4 @@
-// Copyright 2015-2016 Hans Dembinski
+// Copyright 2015-2017 Hans Dembinski
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt
@@ -11,12 +11,8 @@
 #include <boost/python/numpy.hpp>
 #endif
 
-namespace boost {
-namespace histogram {
 void register_axis_types();
 void register_histogram();
-}
-}
 
 BOOST_PYTHON_MODULE(histogram) {
   using namespace boost::python;
@@ -30,7 +26,7 @@ BOOST_PYTHON_MODULE(histogram) {
   current.attr("axis") = axis_module;
   {
     scope current = axis_module;
-    boost::histogram::register_axis_types();
+    register_axis_types();
   }
-  boost::histogram::register_histogram();
+  register_histogram();
 }

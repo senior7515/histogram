@@ -1,4 +1,4 @@
-// Copyright 2015-2016 Hans Dembinski
+// Copyright 2015-2017 Hans Dembinski
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt
@@ -10,10 +10,10 @@
 #include <boost/fusion/algorithm/iteration/for_each.hpp>
 #include <boost/fusion/include/for_each.hpp>
 #include <boost/histogram/detail/utility.hpp>
-#include <boost/histogram/detail/weight_counter.hpp>
 #include <boost/histogram/histogram.hpp>
 #include <boost/histogram/storage/adaptive_storage.hpp>
 #include <boost/histogram/storage/array_storage.hpp>
+#include <boost/histogram/storage/weight_counter.hpp>
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/unique_ptr.hpp>
 #include <boost/serialization/variant.hpp>
@@ -28,20 +28,19 @@ namespace boost {
 namespace histogram {
 
 namespace detail {
-
-template <class Archive>
-void serialize(Archive &ar, weight_counter &wt, unsigned /* version */) {
-  ar &wt.w;
-  ar &wt.w2;
-}
-
 template <typename Archive> struct serialize_helper {
   Archive &ar_;
   explicit serialize_helper(Archive &ar) : ar_(ar) {}
   template <typename T> void operator()(T &t) const { ar_ &t; }
 };
-
 } // namespace detail
+
+template <typename RealType>
+template <class Archive>
+void weight_counter<RealType>::serialize(Archive &ar, unsigned /* version */) {
+  ar &w;
+  ar &w2;
+}
 
 template <class Archive, typename Container>
 void serialize(Archive &ar, array_storage<Container> &store,
@@ -51,7 +50,6 @@ void serialize(Archive &ar, array_storage<Container> &store,
 
 template <class Archive>
 void adaptive_storage::serialize(Archive &ar, unsigned /* version */) {
-  using detail::array;
   auto size = this->size();
   ar &size;
   if (Archive::is_loading::value) {
@@ -60,58 +58,56 @@ void adaptive_storage::serialize(Archive &ar, unsigned /* version */) {
     if (tid == 0u) {
       buffer_ = detail::array<void>(size);
     } else if (tid == 1u) {
-      array<uint8_t> a(size);
+      detail::array<uint8_t> a(size);
       ar &serialization::make_array(a.begin(), size);
       buffer_ = std::move(a);
     } else if (tid == 2u) {
-      array<uint16_t> a(size);
+      detail::array<uint16_t> a(size);
       ar &serialization::make_array(a.begin(), size);
       buffer_ = std::move(a);
     } else if (tid == 3u) {
-      array<uint32_t> a(size);
+      detail::array<uint32_t> a(size);
       ar &serialization::make_array(a.begin(), size);
       buffer_ = std::move(a);
     } else if (tid == 4u) {
-      array<uint64_t> a(size);
+      detail::array<uint64_t> a(size);
       ar &serialization::make_array(a.begin(), size);
       buffer_ = std::move(a);
     } else if (tid == 5u) {
-      array<detail::mp_int> a(size);
+      detail::array<detail::mp_int> a(size);
       ar &serialization::make_array(a.begin(), size);
       buffer_ = std::move(a);
     } else if (tid == 6u) {
-      array<detail::weight_counter> a(size);
+      detail::array<detail::wcount> a(size);
       ar &serialization::make_array(a.begin(), size);
       buffer_ = std::move(a);
     }
   } else {
     auto tid = 0u;
-    if (get<array<void>>(&buffer_)) {
+    if (get<detail::array<void>>(&buffer_)) {
       tid = 0u;
       ar &tid;
-    } else if (auto *a = get<array<uint8_t>>(&buffer_)) {
+    } else if (auto *a = get<detail::array<uint8_t>>(&buffer_)) {
       tid = 1u;
       ar &tid;
       ar &serialization::make_array(a->begin(), size);
-    } else if (auto *a = get<array<uint16_t>>(&buffer_)) {
+    } else if (auto *a = get<detail::array<uint16_t>>(&buffer_)) {
       tid = 2u;
       ar &tid;
       ar &serialization::make_array(a->begin(), size);
-    } else if (auto *a = get<array<uint32_t>>(&buffer_)) {
+    } else if (auto *a = get<detail::array<uint32_t>>(&buffer_)) {
       tid = 3u;
       ar &tid;
       ar &serialization::make_array(a->begin(), size);
-    } else if (auto *a = get<array<uint64_t>>(&buffer_)) {
+    } else if (auto *a = get<detail::array<uint64_t>>(&buffer_)) {
       tid = 4u;
       ar &tid;
       ar &serialization::make_array(a->begin(), size);
-    } else if (auto *a =
-                   get<array<detail::mp_int>>(&buffer_)) {
+    } else if (auto *a = get<detail::array<detail::mp_int>>(&buffer_)) {
       tid = 5u;
       ar &tid;
       ar &serialization::make_array(a->begin(), size);
-    } else if (auto *a =
-                   get<array<detail::weight_counter>>(&buffer_)) {
+    } else if (auto *a = get<detail::array<detail::wcount>>(&buffer_)) {
       tid = 6u;
       ar &tid;
       ar &serialization::make_array(a->begin(), size);
@@ -192,7 +188,8 @@ void any<Axes>::serialize(Archive &ar, unsigned /* version */) {
 
 template <class A, class S>
 template <class Archive>
-void static_histogram<A, S>::serialize(Archive &ar, unsigned /* version */) {
+void histogram<static_tag, A, S>::serialize(Archive &ar,
+                                            unsigned /* version */) {
   detail::serialize_helper<Archive> sh(ar);
   fusion::for_each(axes_, sh);
   ar &storage_;
@@ -200,7 +197,8 @@ void static_histogram<A, S>::serialize(Archive &ar, unsigned /* version */) {
 
 template <class A, class S>
 template <class Archive>
-void dynamic_histogram<A, S>::serialize(Archive &ar, unsigned /* version */) {
+void histogram<dynamic_tag, A, S>::serialize(Archive &ar,
+                                             unsigned /* version */) {
   ar &axes_;
   ar &storage_;
 }

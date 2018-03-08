@@ -1,4 +1,4 @@
-// Copyright 2015-2016 Hans Dembinski
+// Copyright 2015-2017 Hans Dembinski
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt
@@ -8,10 +8,11 @@
 #define _BOOST_HISTOGRAM_AXIS_ANY_HPP_
 
 #include <boost/histogram/axis/iterator.hpp>
-#include <boost/histogram/interval.hpp>
-#include <boost/utility/string_view.hpp>
 #include <boost/histogram/detail/axis_visitor.hpp>
+#include <boost/histogram/detail/cat.hpp>
+#include <boost/histogram/interval.hpp>
 #include <boost/mpl/contains.hpp>
+#include <boost/utility/string_view.hpp>
 #include <boost/variant.hpp>
 #include <stdexcept>
 #include <type_traits>
@@ -42,13 +43,15 @@ struct uoflow : public static_visitor<bool> {
 };
 
 struct get_label : public static_visitor<string_view> {
-  template <typename A> ::boost::string_view operator()(const A& a) const { return a.label(); }
+  template <typename A>::boost::string_view operator()(const A &a) const {
+    return a.label();
+  }
 };
 
 struct set_label : public static_visitor<void> {
   const ::boost::string_view label;
   set_label(const ::boost::string_view x) : label(x) {}
-  template <typename A> void operator()(A& a) const { a.label(label); }
+  template <typename A> void operator()(A &a) const { a.label(label); }
 };
 
 template <typename T> struct index : public static_visitor<int> {
@@ -57,11 +60,14 @@ template <typename T> struct index : public static_visitor<int> {
   template <typename Axis> int operator()(const Axis &a) const {
     return impl(std::is_convertible<T, typename Axis::value_type>(), a);
   }
-  template <typename Axis> int impl(std::true_type, const Axis& a) const {
+  template <typename Axis> int impl(std::true_type, const Axis &a) const {
     return a.index(t);
   }
-  template <typename Axis> int impl(std::false_type, const Axis&) const {
-    throw std::runtime_error("index argument not convertible to axis value type");
+  template <typename Axis> int impl(std::false_type, const Axis &) const {
+    throw std::runtime_error(::boost::histogram::detail::cat(
+        "fill argument not convertible to axis value type: ",
+        boost::typeindex::type_id<Axis>().pretty_name(), ", ",
+        boost::typeindex::type_id<T>().pretty_name()));
   }
 };
 
@@ -83,53 +89,44 @@ struct bin : public static_visitor<axis::interval<double>> {
 } // namespace detail
 
 /// Polymorphic axis type
-template <typename Axes>
-class any : public make_variant_over<Axes>::type {
+template <typename Axes> class any : public make_variant_over<Axes>::type {
   using base_type = typename make_variant_over<Axes>::type;
+
 public:
   using types = typename base_type::types;
   using value_type = double;
   using bin_type = interval<double>;
-  using const_iterator = axis_iterator<any>;
+  using const_iterator = iterator_over<any>;
 
   any() = default;
-  any(const any& t) = default;
-  any(any&& t) = default;
-  any& operator=(const any& t) = default;
-  any& operator=(any&& t) = default;
+  any(const any &t) = default;
+  any(any &&t) = default;
+  any &operator=(const any &t) = default;
+  any &operator=(any &&t) = default;
 
   template <typename T, typename = typename std::enable_if<
-    mpl::contains<Axes, T>::value
-  >::type>
-  any(const T& t) : base_type(t) {}
+                            mpl::contains<types, T>::value>::type>
+  any(const T &t) : base_type(t) {}
 
   template <typename T, typename = typename std::enable_if<
-    mpl::contains<Axes, T>::value
-  >::type>
-  any& operator=(const T& t) {
+                            mpl::contains<types, T>::value>::type>
+  any &operator=(const T &t) {
     // ugly workaround for compiler bug
-    return reinterpret_cast<any&>(base_type::operator=(t));
+    return reinterpret_cast<any &>(base_type::operator=(t));
   }
 
   template <typename T, typename = typename std::enable_if<
-    mpl::contains<Axes, T>::value
-  >::type>
-  any& operator=(T&& t) {
+                            mpl::contains<types, T>::value>::type>
+  any &operator=(T &&t) {
     // ugly workaround for compiler bug
-    return reinterpret_cast<any&>(base_type::operator=(std::move(t)));
+    return reinterpret_cast<any &>(base_type::operator=(std::move(t)));
   }
 
-  int size() const {
-    return apply_visitor(detail::size(), *this);
-  }
+  int size() const { return apply_visitor(detail::size(), *this); }
 
-  int shape() const {
-    return apply_visitor(detail::shape(), *this);
-  }
+  int shape() const { return apply_visitor(detail::shape(), *this); }
 
-  bool uoflow() const {
-    return apply_visitor(detail::uoflow(), *this);
-  }
+  bool uoflow() const { return apply_visitor(detail::uoflow(), *this); }
 
   // note: this only works for axes with compatible value type
   int index(const value_type x) const {
@@ -150,8 +147,8 @@ public:
     return apply_visitor(detail::bin(i), *this);
   }
 
-  bool operator==(const any& rhs) const {
-    return base_type::operator==(static_cast<const base_type&>(rhs));
+  bool operator==(const any &rhs) const {
+    return base_type::operator==(static_cast<const base_type &>(rhs));
   }
 
   const_iterator begin() const { return const_iterator(*this, 0); }
@@ -160,34 +157,49 @@ public:
 
 private:
   friend class ::boost::serialization::access;
-  template <typename Archive> void serialize(Archive&, unsigned);
+  template <typename Archive> void serialize(Archive &, unsigned);
 };
 
 // dynamic casts
 template <typename T, typename Axes>
-typename std::add_lvalue_reference<T>::type cast(any<Axes>& any) { return get<T>(any); }
+typename std::add_lvalue_reference<T>::type cast(any<Axes> &any) {
+  return get<T>(any);
+}
 
 template <typename T, typename Axes>
-const typename std::add_lvalue_reference<T>::type cast(const any<Axes>& any) { return get<T>(any); }
+const typename std::add_lvalue_reference<T>::type cast(const any<Axes> &any) {
+  return get<T>(any);
+}
 
 template <typename T, typename Axes>
-typename std::add_pointer<T>::type cast(any<Axes>* any) { return get<T>(&any); }
+typename std::add_pointer<T>::type cast(any<Axes> *any) {
+  return get<T>(&any);
+}
 
 template <typename T, typename Axes>
-const typename std::add_pointer<T>::type cast(const any<Axes>* any) { return get<T>(&any); }
+const typename std::add_pointer<T>::type cast(const any<Axes> *any) {
+  return get<T>(&any);
+}
 
-// pass-through versions for generic programming, i.e. when you switch to static histogram
-template <typename T>
-typename std::add_lvalue_reference<T>::type cast(T& t) { return t; }
-
-template <typename T>
-const typename std::add_lvalue_reference<T>::type cast(const T& t) { return t; }
-
-template <typename T>
-typename std::add_pointer<T>::type cast(T* t) { return t; }
+// pass-through versions for generic programming, i.e. when you switch to static
+// histogram
+template <typename T> typename std::add_lvalue_reference<T>::type cast(T &t) {
+  return t;
+}
 
 template <typename T>
-const typename std::add_pointer<T>::type cast(const T* t) { return t; }
+const typename std::add_lvalue_reference<T>::type cast(const T &t) {
+  return t;
+}
+
+template <typename T> typename std::add_pointer<T>::type cast(T *t) {
+  return t;
+}
+
+template <typename T>
+const typename std::add_pointer<T>::type cast(const T *t) {
+  return t;
+}
 
 } // namespace axis
 } // namespace histogram

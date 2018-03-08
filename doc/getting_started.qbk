@@ -33,17 +33,7 @@ int main(int, char**) {
     h.fill(20.0); // put in overflow bin
 
     /*
-        use bh::count(N) if you would otherwise call h.fill(...) with
-        *same* argument N times, N is an integer argument
-    */
-    h.fill(1.0, bh::count(4));
-
-    /*
         do a weighted fill using bh::weight, which accepts a double
-        - don't mix this with bh::count, both have a different effect on the
-          variance (see Rationale for an explanation regarding weights)
-        - if you don't know what this is good for, use bh::count instead,
-          it is most likeliy what you want and it is more efficient
     */
     h.fill(0.1, bh::weight(2.5));
 
@@ -55,26 +45,27 @@ int main(int, char**) {
           `bin_type` usually is a semi-open interval representing the bin,
           whose edges can be accessed with methods `lower()` and `upper()`,
           but the [bin type] depends on the axis, look it up in the reference
-        - `value(index)` method returns the bin count at index
-        - `variance(index)` method returns a variance estimate of the bin
-          count at index (see Rationale section for what this means)
+        - `bin(index)` method returns the bin counter at index, you can then
+           access its `value() and `variance()` methods; the first returns the
+           actual count, the second returns a variance estimate of the count
+           (see Rationale section for what this means)
     */
-    for (const auto& bin : h.axis(0_c)) {
-        std::cout << "bin " << bin.first << " x in ["
-                  << bin.second.lower() << ", " << bin.second.upper() << "): "
-                  << h.value(bin.first) << " +/- "
-                  << std::sqrt(h.variance(bin.first))
+    for (auto a : h.axis(0_c)) {
+        std::cout << "bin " << a.first << " x in ["
+                  << a.second.lower() << ", " << a.second.upper() << "): "
+                  << h.bin(a.first).value() << " +/- "
+                  << std::sqrt(h.bin(a.first).variance())
                   << std::endl;
     }
 
     // accessing under- and overflow bins is easy, use indices -1 and 10
     std::cout << "underflow bin [" << h.axis(0_c)[-1].lower()
               << ", " << h.axis(0_c)[-1].upper() << "): "
-              << h.value(-1) << " +/- " << std::sqrt(h.variance(-1))
+              << h.bin(-1).value() << " +/- " << std::sqrt(h.bin(-1).variance())
               << std::endl;
     std::cout << "overflow  bin [" << h.axis(0_c)[10].lower()
               << ", " << h.axis(0_c)[10].upper() << "): "
-              << h.value(10) << " +/- " << std::sqrt(h.variance(10))
+              << h.bin(10).value() << " +/- " << std::sqrt(h.bin(10).variance())
               << std::endl;
 
     /* program output:
@@ -100,7 +91,7 @@ int main(int, char**) {
 
 [section Make and use a dynamic 3d-histogram in C++]
 
-Dynamic histograms are a bit slower than static histograms, but still faster than other libraries. Use a dynamic histogram when you only know at runtime how to layout the histogram, for example, because you wrote a graphical user interface that uses Boost.Histogram underneath.
+Dynamic histograms are a bit slower than static histograms, but still faster than other libraries. Use a dynamic histogram when you only know at runtime which and how many axis are going to be used, for example, because you wrote a graphical user interface that uses Boost.Histogram underneath.
 
 [c++]``
 #include <boost/histogram.hpp>
@@ -140,11 +131,11 @@ int main() {
           this is here the case for the category axis
     */
     using cas = bh::axis::category<std::string>;
-    for (const auto& cbin : bh::axis::cast<cas>(h.axis(0))) {
+    for (auto cbin : bh::axis::cast<cas>(h.axis(0))) {
         std::printf("%s\n", cbin.second.c_str());
         for (const auto& ybin : h.axis(2)) { // rows
             for (const auto& xbin : h.axis(1)) { // columns
-                std::printf("%3.0f ", h.value(cbin.first, xbin.first, ybin.first));
+                std::printf("%3.0f ", h.bin(cbin.first, xbin.first, ybin.first).value());
             }
             std::printf("\n");
         }
@@ -230,12 +221,12 @@ h = hg.histogram(hg.axis.regular_log(5, 1e0, 1e5, "x"))
 
 # fill histogram with numbers
 for x in (2e0, 2e1, 2e2, 2e3, 2e4):
-    h.fill(x, count=2)
+    h.fill(x, weight=2)
 
 # iterate over bins and access bin counter
 for idx, (lower, upper) in enumerate(h.axis(0)):
     print "bin {0} x in [{1}, {2}): {3} +/- {4}".format(
-        idx, lower, upper, h.value(idx), h.variance(idx) ** 0.5)
+        idx, lower, upper, h.bin(idx).value, h.bin(idx).variance ** 0.5)
 ``
 
 [endsect]

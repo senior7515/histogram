@@ -1,4 +1,4 @@
-// Copyright 2015-2016 Hans Dembinski
+// Copyright 2015-2017 Hans Dembinski
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt
@@ -8,10 +8,9 @@
 #define _BOOST_HISTOGRAM_STORAGE_ARRAY_HPP_
 
 #include <algorithm>
-#include <boost/histogram/detail/meta.hpp>
+#include <boost/histogram/storage/weight_counter.hpp>
 #include <cstddef>
 #include <memory>
-#include <type_traits>
 
 // forward declaration for serialization
 namespace boost {
@@ -23,12 +22,9 @@ class access;
 namespace boost {
 namespace histogram {
 
-namespace detail {} // namespace detail
-
 template <typename T> class array_storage {
 public:
-  static_assert(is_arithmetic<T>::value, "T must support arithmetic operators");
-  using value_type = T;
+  using bin_type = T;
 
   explicit array_storage(std::size_t s) { init(s); }
 
@@ -56,52 +52,62 @@ public:
     return *this;
   }
 
-  template <typename S, typename = detail::is_storage<S>>
-  explicit array_storage(const S &other) {
+  template <typename S> explicit array_storage(const S &other) {
     reset(other.size());
-    for (decltype(size_) i = 0u; i < size_; ++i) {
-      array_[i] = other.value(i);
-    }
+    for (std::size_t i = 0; i < size_; ++i)
+      array_[i] = static_cast<bin_type>(other[i]);
   }
 
   template <typename S> array_storage &operator=(const S &other) {
     reset(other.size());
-    for (decltype(size_) i = 0u; i < size_; ++i) {
-      array_[i] = other.value(i);
-    }
+    for (std::size_t i = 0; i < size_; ++i)
+      array_[i] = static_cast<bin_type>(other[i]);
     return *this;
   }
 
   std::size_t size() const noexcept { return size_; }
-  void increase(std::size_t i) noexcept { ++array_[i]; }
-  void add(std::size_t i, const value_type &n) noexcept { array_[i] += n; }
 
-  value_type value(std::size_t i) const noexcept { return array_[i]; }
+  void increase(std::size_t i) noexcept { ++array_[i]; }
+
+  template <typename U> void add(std::size_t i, const U &x) noexcept {
+    array_[i] += x;
+  }
+
+  const bin_type& operator[](std::size_t i) const noexcept {
+    return array_[i];
+  }
 
   template <typename U>
-  array_storage &operator+=(const array_storage<U> &rhs) noexcept {
-    for (auto i = 0ul; i < size_; ++i)
-      array_[i] += rhs.array_[i];
+  bool operator==(const array_storage<U> &rhs) const noexcept {
+    if (size_ != rhs.size_)
+      return false;
+    return std::equal(array_.get(), array_.get() + size_,
+                      rhs.array_.get());
+  }
+
+  template <typename S> array_storage &operator+=(const S &rhs) noexcept {
+    for (std::size_t i = 0; i < size_; ++i)
+      array_[i] += static_cast<bin_type>(rhs[i]);
     return *this;
   }
 
-  array_storage &operator*=(const value_type x) noexcept {
-    for (auto i = 0ul; i < size_; ++i)
+  template <typename U> array_storage &operator*=(const U &x) noexcept {
+    for (std::size_t i = 0; i < size_; ++i)
       array_[i] *= x;
     return *this;
   }
 
 private:
   std::size_t size_ = 0;
-  std::unique_ptr<T[]> array_;
+  std::unique_ptr<bin_type[]> array_;
 
   void reset(std::size_t size) {
     size_ = size;
-    array_.reset(new T[size]);
+    array_.reset(new bin_type[size]);
   }
   void init(std::size_t size) {
     reset(size);
-    std::fill(array_.get(), array_.get() + size, T(0));
+    std::fill(array_.get(), array_.get() + size, bin_type(0));
   }
 
   template <typename U> friend class array_storage;

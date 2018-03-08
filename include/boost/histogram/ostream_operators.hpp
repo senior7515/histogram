@@ -1,4 +1,4 @@
-// Copyright 2015-2016 Hans Dembinski
+// Copyright 2015-2017 Hans Dembinski
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt
@@ -23,11 +23,10 @@ struct axis_ostream_visitor {
 };
 } // namespace detail
 
-template <template <class, class> class H, typename A, typename S>
-inline std::ostream &operator<<(std::ostream &os, const H<A, S> &h) {
+template <typename T, typename A, typename S>
+inline std::ostream &operator<<(std::ostream &os, const histogram<T, A, S> &h) {
   os << "histogram(";
-  detail::axis_ostream_visitor sh(os);
-  h.for_each_axis(sh);
+  h.for_each_axis(detail::axis_ostream_visitor(os));
   os << (h.dim() ? "\n)" : ")");
   return os;
 }

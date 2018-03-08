@@ -1,4 +1,4 @@
-// Copyright 2015-2016 Hans Demsizeki
+// Copyright 2015-2017 Hans Demsizeki
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt
@@ -14,7 +14,6 @@
 #include <boost/fusion/include/size.hpp>
 #include <boost/fusion/support/is_sequence.hpp>
 #include <boost/histogram/interval.hpp>
-#include <boost/utility/string_view.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/contains.hpp>
 #include <boost/variant/get.hpp>
@@ -83,7 +82,7 @@ template <typename Iterator> struct fusion_assign_axis2 {
   template <typename T> void operator()(const T &t) const { *(iter++) = t; }
 };
 
-struct field_count : public static_visitor<void> {
+struct field_count_visitor : public static_visitor<void> {
   mutable std::size_t value = 1;
   template <typename T> void operator()(const T &t) const {
     value *= t.shape();
@@ -102,7 +101,7 @@ inline bool axes_equal_impl(mpl::false_, mpl::false_, const A &a, const B &b) {
   if (a.size() != n) {
     return false;
   }
-  for (auto i = 0; i < n; ++i) {
+  for (auto i = 0u; i < n; ++i) {
     if (!apply_visitor(cmp_axis<typename A::value_type>(a[i]), b[i])) {
       return false;
     }
