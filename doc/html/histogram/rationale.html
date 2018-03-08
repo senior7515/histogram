@@ -56,9 +56,15 @@
         from the <a href="https://eigen.tuxfamily.org/" target="_top">Eigen library</a>.
       </p>
 <p>
-        Two design goals of the library:
+        Three design goals of the library:
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+            Provide a simple and convenient default behavior for the casual user,
+            yet allow a maximum of customization for the power user. Follow the "Don't
+            pay for what you don't use" principle. Features that you don't use
+            should not affect your performance negatively.
+          </li>
 <li class="listitem">
             Provide the same interface for one-dimensional and multi-dimensional
             histograms. This makes the interface easier to learn, and makes it easier
@@ -134,8 +140,8 @@
       </p>
 <p>
         Users can chose between two histogram variants, which have the same user
-        interface, see <code class="computeroutput"><a class="link" href="../boost/histogram/static_histogram.html" title="Class template static_histogram">boost::histogram::static_histogram</a></code>
-        and <code class="computeroutput"><a class="link" href="../boost/histogram/dynamic_histogram.html" title="Class template dynamic_histogram">boost::histogram::dynamic_histogram</a></code>.
+        interface, see <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.static_histogram">boost::histogram::static_histogram</a></code>
+        and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.dynamic_histogram">boost::histogram::dynamic_histogram</a></code>.
         The static variant is faster (see <a class="link" href="benchmarks.html" title="Benchmarks">benchmark</a>),
         because it can access the different axis types without any indirections or
         dynamic type casting. This also means that user errors are caught at compile-time
