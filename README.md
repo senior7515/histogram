@@ -33,7 +33,7 @@ Check out the [full documentation](http://hdembinski.github.io/histogram/doc/htm
 * Support for Python 2.x and 3.x
 * Support for Numpy
 
-(+) In the standard configuration and if you don't use weighted input.
+(+) In the standard configuration, if you don't use weighted increments.
 (++) If you don't use weighted increments, variance tracking come at zero cost. If you use weighted increments, extra space is reserved internally to keep track of a variance counter per bin. The conversion happens automatically and transparently.
 
 ## Dependencies
@@ -94,10 +94,10 @@ Example 1: Fill a 1d-histogram in C++
         h.fill(0.1, bh::weight(5)); // fill with a weighted entry, weight is 5
 
         // iterate over bins, loop skips under- and overflow bin
-        for (const auto& bin : h.axis(0_c)) {
-            std::cout << "bin " << bin.first
-                      << " x in [" << bin.second.lower() << ", " << bin.second.upper() << "): "
-                      << h.value(bin.first) << " +/- " << std::sqrt(h.variance(bin.first))
+        for (auto bin : h.axis(0_c)) {
+            std::cout << "bin " << bin.idx()
+                      << " x in [" << bin.lower() << ", " << bin.upper() << "): "
+                      << h.bin(bin).value() << " +/- " << std::sqrt(h.bin(bin).variance())
                       << std::endl;
         }
 

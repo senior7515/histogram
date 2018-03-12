@@ -28,7 +28,8 @@ public:
   weight_counter &operator=(const weight_counter &) = default;
   weight_counter &operator=(weight_counter &&) = default;
 
-  weight_counter(const RealType& value, const RealType& variance) : w(value), w2(variance) {}
+  weight_counter(const RealType &value, const RealType &variance)
+      : w(value), w2(variance) {}
 
   weight_counter &operator++() {
     ++w;
@@ -63,43 +64,50 @@ public:
     return *this;
   }
 
-  bool operator==(const weight_counter &rhs) const {
+  bool operator==(const weight_counter &rhs) const noexcept {
     return w == rhs.w && w2 == rhs.w2;
   }
 
-  bool operator!=(const weight_counter &rhs) const { return !operator==(rhs); }
-
-  template <typename T> bool operator==(const weight_counter<T> &rhs) const {
-    return w == rhs.w && w2 == rhs.w2;
-  }
-
-  template <typename T> bool operator!=(const weight_counter<T> &rhs) const {
+  bool operator!=(const weight_counter &rhs) const noexcept {
     return !operator==(rhs);
   }
 
-  template <typename T> bool operator==(const T &rhs) const {
+  template <typename T>
+  bool operator==(const weight_counter<T> &rhs) const noexcept {
+    return w == rhs.w && w2 == rhs.w2;
+  }
+
+  template <typename T>
+  bool operator!=(const weight_counter<T> &rhs) const noexcept {
+    return !operator==(rhs);
+  }
+
+  template <typename T> bool operator==(const T &rhs) const noexcept {
     return w == w2 && w == static_cast<RealType>(rhs);
   }
 
-  template <typename T> bool operator!=(const T &rhs) const {
+  template <typename T> bool operator!=(const T &rhs) const noexcept {
     return !operator==(rhs);
   }
 
-  const RealType& value() const noexcept { return w; }
-  const RealType& variance() const noexcept { return w2; }
+  const RealType &value() const noexcept { return w; }
+  const RealType &variance() const noexcept { return w2; }
 
   bool has_trivial_variance() const noexcept { return w == w2; }
 
   // conversion
-  template <typename T> explicit weight_counter(const T &t) : w(static_cast<T>(t)), w2(w) {}
+  template <typename T>
+  explicit weight_counter(const T &t) : w(static_cast<T>(t)), w2(w) {}
   explicit operator RealType() const {
     if (!has_trivial_variance())
-      throw std::logic_error("cannot convert weight_counter to RealType, value and variance differ");
+      throw std::logic_error("cannot convert weight_counter to RealType, value "
+                             "and variance differ");
     return w;
   }
   template <typename T> explicit operator T() const {
     if (!has_trivial_variance())
-      throw std::logic_error("cannot convert weight_counter to RealType, value and variance differ");
+      throw std::logic_error("cannot convert weight_counter to RealType, value "
+                             "and variance differ");
     return w;
   }
   template <typename T> weight_counter &operator=(const T &x) {

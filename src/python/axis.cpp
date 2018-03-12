@@ -8,6 +8,7 @@
 #include <boost/histogram/histogram_fwd.hpp>
 #include <boost/histogram/axis/axis.hpp>
 #include <boost/histogram/axis/any.hpp>
+#include <boost/histogram/axis/bin_view.hpp>
 #include <boost/histogram/axis/ostream_operators.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/python.hpp>
@@ -54,23 +55,21 @@ generic_iterator make_generic_iterator(bp::object self) {
   return generic_iterator(self);
 }
 
-template <typename T>
-struct axis_interval_to_python
+template <typename Axis>
+struct axis_value_view_to_python
 {
-  static PyObject* convert(const bha::interval<T> &i)
+  static PyObject* convert(const bha::value_view<Axis> &i)
   {
-    return bp::incref(bp::make_tuple(i.lower(), i.upper()).ptr());
+    return bp::incref(bp::object(i.value()).ptr());
   }
 };
 
-template <typename T>
-struct pair_int_axis_interval_to_python
+template <typename Axis>
+struct axis_interval_view_to_python
 {
-  static PyObject* convert(const std::pair<int, bha::interval<T>> &p)
+  static PyObject* convert(const bha::interval_view<Axis> &i)
   {
-    return bp::incref(bp::make_tuple(
-      p.first, bp::make_tuple(p.second.lower(), p.second.upper())
-    ).ptr());
+    return bp::incref(bp::make_tuple(i.lower(), i.upper()).ptr());
   }
 };
 
@@ -91,10 +90,10 @@ bp::object variable_init(bp::tuple args, bp::dict kwargs) {
   auto uo = bha::uoflow::on;
   while (len(kwargs) > 0) {
     bp::tuple kv = kwargs.popitem();
-    boost::string_view k = bp::extract<const char*>(kv[0])();
+    boost::string_view k(bp::extract<const char*>(kv[0]), bp::len(kv[0]));
     bp::object v = kv[1];
     if (k == "label")
-      label = bp::extract<const char*>(v)();
+      label = boost::string_view(bp::extract<const char*>(v), bp::len(v));
     else if (k == "uoflow") {
       if (!bp::extract<bool>(v))
         uo = bha::uoflow::off;
@@ -122,10 +121,10 @@ bp::object category_init(bp::tuple args, bp::dict kwargs) {
   boost::string_view label;
   while (bp::len(kwargs) > 0) {
     bp::tuple kv = kwargs.popitem();
-    boost::string_view k = bp::extract<const char*>(kv[0])();
+    boost::string_view k(bp::extract<const char*>(kv[0]), bp::len(kv[0]));
     bp::object v = kv[1];
     if (k == "label")
-      label = bp::extract<const char*>(v)();
+      label = boost::string_view(bp::extract<const char*>(v), bp::len(v));
     else {
       std::stringstream s;
       s << "keyword " << k << " not recognized";
@@ -141,14 +140,6 @@ bp::object category_init(bp::tuple args, bp::dict kwargs) {
   return self.attr("__init__")(bha::category<>(c.begin(), c.end(), label));
 }
 
-template <typename A> bp::object axis_getitem(const A &a, int i) {
-  if (i < -1 * a.uoflow() || i >= a.size() + 1 * a.uoflow()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    bp::throw_error_already_set();
-  }
-  return bp::object(a[i]);
-}
-
 template <typename T> void axis_set_label(T& t, bp::str s) {
   t.label({bp::extract<const char*>(s)(),
            static_cast<std::size_t>(bp::len(s))});
@@ -159,9 +150,25 @@ template <typename T> bp::str axis_get_label(const T& t) {
   return {s.data(), s.size()};
 }
 
+template <typename A> bp::object axis_getitem(const A &a, int i) {
+  if (i < -1 * a.uoflow() || i >= a.size() + 1 * a.uoflow()) {
+    PyErr_SetString(PyExc_IndexError, "index out of bounds");
+    bp::throw_error_already_set();
+  }
+  return bp::make_tuple(a.lower(i), a.lower(i+1));
+}
+
+template <> bp::object axis_getitem<bha::category<>>(const bha::category<> &a, int i) {
+  if (i < 0 || i >= a.size()) {
+    PyErr_SetString(PyExc_IndexError, "index out of bounds");
+    bp::throw_error_already_set();
+  }
+  return bp::object(a.value(i));
+}
+
 #ifdef HAVE_NUMPY
 template <typename Axis> bp::object axis_array_interface(const Axis& axis) {
-  using T = typename std::decay<decltype(axis[0].lower())>::type;
+  using T = typename std::decay<typename Axis::value_type>::type;
   bp::dict d;
   auto shape = bp::make_tuple(axis.size()+1);
   d["shape"] = shape;
@@ -170,7 +177,7 @@ template <typename Axis> bp::object axis_array_interface(const Axis& axis) {
   auto a = np::empty(shape, np::dtype::get_builtin<T>());
   auto buf = reinterpret_cast<T*>(a.get_data());
   for (auto i = 0; i < axis.size()+1; ++i)
-    buf[i] = axis[i].lower();
+    buf[i] = axis.lower(i);
   d["data"] = a;
   d["version"] = 3;
   return d;
@@ -185,7 +192,7 @@ template <> bp::object axis_array_interface<bha::category<>>(const bha::category
   auto a = np::empty(shape, np::dtype::get_builtin<int>());
   auto buf = reinterpret_cast<int*>(a.get_data());
   for (auto i = 0; i < axis.size(); ++i)
-    buf[i] = axis[i];
+    buf[i] = axis.value(i);
   d["data"] = a;
   d["version"] = 3;
   return d;
@@ -261,26 +268,6 @@ void register_axis_types() {
   using namespace ::boost::python;
   using bp::arg; // resolve ambiguity
   docstring_options dopt(true, true, false);
-
-  to_python_converter<
-    bha::interval<int>,
-    axis_interval_to_python<int>
-  >();
-
-  to_python_converter<
-    bha::interval<double>,
-    axis_interval_to_python<double>
-  >();
-
-  to_python_converter<
-    std::pair<int, bha::interval<int>>,
-    pair_int_axis_interval_to_python<int>
-  >();
-
-  to_python_converter<
-    std::pair<int, bha::interval<double>>,
-    pair_int_axis_interval_to_python<double>
-  >();
 
   class_<generic_iterator>("generic_iterator", init<object>())
     .def("__iter__", &generic_iterator::self)

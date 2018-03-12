@@ -4,6 +4,7 @@
 // (See accompanying file LICENSE_1_0.txt
 // or copy at http://www.boost.org/LICENSE_1_0.txt)
 
+#include <array>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/core/lightweight_test.hpp>
@@ -19,7 +20,6 @@
 #include <limits>
 #include <sstream>
 #include <vector>
-#include <array>
 
 using namespace boost::histogram;
 using namespace boost::histogram::literals; // to get _c suffix
@@ -209,7 +209,7 @@ template <typename Type> void run_tests() {
     BOOST_TEST_EQ(c.axis().label(), "foo");
     // need to cast here for this to work with Type == dynamic_tag
     auto ca = axis::cast<axis::category<>>(c.axis());
-    BOOST_TEST_EQ(ca[0], A);
+    BOOST_TEST_EQ(ca[0].value(), A);
   }
 
   // equal_compare
@@ -852,8 +852,8 @@ int main() {
 
   // using iterator ranges
   {
-    auto h = make_dynamic_histogram(axis::integer<>(0, 2),
-                                    axis::integer<>(2, 4));
+    auto h =
+        make_dynamic_histogram(axis::integer<>(0, 2), axis::integer<>(2, 4));
     auto v = std::vector<int>(2);
     auto i = std::array<int, 2>();
 
@@ -862,9 +862,9 @@ int main() {
     v = {1, 3};
     h.fill(v.begin(), v.end());
 
-    i = {0, 0};
+    i = {{0, 0}};
     BOOST_TEST_EQ(h.bin(i.begin(), i.end()).value(), 1);
-    i = {1, 1};
+    i = {{1, 1}};
     BOOST_TEST_EQ(h.bin(i.begin(), i.end()).variance(), 1);
 
     v = {0, 2};
@@ -872,9 +872,9 @@ int main() {
     v = {1, 3};
     h.fill(v.begin(), v.end(), weight(2));
 
-    i = {0, 0};
+    i = {{0, 0}};
     BOOST_TEST_EQ(h.bin(i.begin(), i.end()).value(), 3);
-    i = {1, 1};
+    i = {{1, 1}};
     BOOST_TEST_EQ(h.bin(i.begin(), i.end()).variance(), 5);
   }
 
@@ -882,8 +882,7 @@ int main() {
   {
     enum { A, B };
     auto c = make_dynamic_histogram(axis::category<>({A, B}));
-    BOOST_TEST_THROWS(c.axis()[0].lower(), std::runtime_error);
-    BOOST_TEST_THROWS(c.axis()[0].upper(), std::runtime_error);
+    BOOST_TEST_THROWS(c.axis().lower(0), std::runtime_error);
   }
 
   // reduce
