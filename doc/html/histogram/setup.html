@@ -69,6 +69,15 @@ b2 --with-python # for the Python bindings
         Only the Python bindings need building, the rest of the library is header
         only.
       </p>
+<p>
+        If the build fails, try to add these lines to your <code class="computeroutput">user-config.jam</code>,
+        which turn on C++11 support and increase the stack size for template recursion.
+      </p>
+<pre class="programlisting">import toolset : using ;
+using python ;
+using gcc : c++11 : "g++" : &lt;cxxflags&gt;-std=c++11 &lt;cxxflags&gt;-ftemplate-depth=500 ;
+using clang : c++11 : "clang++" : &lt;cxxflags&gt;-std=c++11 ;
+</pre>
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>

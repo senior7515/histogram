@@ -1,13 +1,13 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
-<title>Class axis_base</title>
+<title>Class template axis_base</title>
 <link rel="stylesheet" href="../../../../../doc/src/boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="../../../index.html" title="Chapter&#160;1.&#160;Boost.Histogram">
 <link rel="up" href="../../../histogram/reference.html#header.boost.histogram.axis.axis_hpp" title="Header &lt;boost/histogram/axis/axis.hpp&gt;">
 <link rel="prev" href="transform/sqrt.html" title="Struct sqrt">
-<link rel="next" href="axis_base_uoflow.html" title="Class axis_base_uoflow">
+<link rel="next" href="axis_base_uoflow.html" title="Class template axis_base_uoflow">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table cellpadding="2" width="100%"><tr>
@@ -25,77 +25,89 @@
 <div class="refentry">
 <a name="boost.histogram.axis.axis_base"></a><div class="titlepage"></div>
 <div class="refnamediv">
-<h2><span class="refentrytitle">Class axis_base</span></h2>
-<p>boost::histogram::axis::axis_base &#8212; Base class for all axes. </p>
+<h2><span class="refentrytitle">Class template axis_base</span></h2>
+<p>boost::histogram::axis::axis_base &#8212; Base class for all axes, uses CRTP to inject iterator logic. </p>
 </div>
 <h2 xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" class="refsynopsisdiv-title">Synopsis</h2>
 <div xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" class="refsynopsisdiv"><pre class="synopsis"><span class="comment">// In header: &lt;<a class="link" href="../../../histogram/reference.html#header.boost.histogram.axis.axis_hpp" title="Header &lt;boost/histogram/axis/axis.hpp&gt;">boost/histogram/axis/axis.hpp</a>&gt;
 
-</span>
-<span class="keyword">class</span> <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">{</span>
+</span><span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Derived<span class="special">&gt;</span> 
+<span class="keyword">class</span> <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
+  <span class="comment">// types</span>
+  <span class="keyword">typedef</span> <span class="identifier">iterator_over</span><span class="special">&lt;</span> <span class="identifier">Derived</span> <span class="special">&gt;</span>         <a name="boost.histogram.axis.axis_base.const_iterator"></a><span class="identifier">const_iterator</span><span class="special">;</span>        
+  <span class="keyword">typedef</span> <span class="identifier">reverse_iterator_over</span><span class="special">&lt;</span> <span class="identifier">Derived</span> <span class="special">&gt;</span> <a name="boost.histogram.axis.axis_base.const_reverse_iterator"></a><span class="identifier">const_reverse_iterator</span><span class="special">;</span>
+
   <span class="comment">// <a class="link" href="axis_base.html#boost.histogram.axis.axis_baseconstruct-copy-destruct">construct/copy/destruct</a></span>
-  <a class="link" href="axis_base.html#idm541226230320-bb"><span class="identifier">axis_base</span></a><span class="special">(</span><span class="keyword">unsigned</span><span class="special">,</span> <span class="identifier">string_view</span><span class="special">)</span><span class="special">;</span>
-  <a class="link" href="axis_base.html#idm541226228768-bb"><span class="identifier">axis_base</span></a><span class="special">(</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span>
-  <a class="link" href="axis_base.html#idm541226228256-bb"><span class="identifier">axis_base</span></a><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span>
-  <a class="link" href="axis_base.html#idm541226224576-bb"><span class="identifier">axis_base</span></a><span class="special">(</span><a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;&amp;</span><span class="special">)</span><span class="special">;</span>
-  <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span> <a class="link" href="axis_base.html#idm541226226688-bb"><span class="keyword">operator</span><span class="special">=</span></a><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span>
-  <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span> <a class="link" href="axis_base.html#idm541226223392-bb"><span class="keyword">operator</span><span class="special">=</span></a><span class="special">(</span><a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;&amp;</span><span class="special">)</span><span class="special">;</span>
+  <a class="link" href="axis_base.html#idm419073159440-bb"><span class="identifier">axis_base</span></a><span class="special">(</span><span class="keyword">unsigned</span><span class="special">,</span> <span class="identifier">string_view</span><span class="special">)</span><span class="special">;</span>
+  <a class="link" href="axis_base.html#idm419073157888-bb"><span class="identifier">axis_base</span></a><span class="special">(</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span>
+  <a class="link" href="axis_base.html#idm419073157376-bb"><span class="identifier">axis_base</span></a><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span>
+  <a class="link" href="axis_base.html#idm419073153696-bb"><span class="identifier">axis_base</span></a><span class="special">(</span><a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;&amp;</span><span class="special">)</span><span class="special">;</span>
+  <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span> <a class="link" href="axis_base.html#idm419073155808-bb"><span class="keyword">operator</span><span class="special">=</span></a><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span>
+  <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span> <a class="link" href="axis_base.html#idm419073152512-bb"><span class="keyword">operator</span><span class="special">=</span></a><span class="special">(</span><a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;&amp;</span><span class="special">)</span><span class="special">;</span>
 
-  <span class="comment">// <a class="link" href="axis_base.html#idm541226240832-bb">public member functions</a></span>
-  <span class="keyword">int</span> <a class="link" href="axis_base.html#idm541226240304-bb"><span class="identifier">size</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
-  <span class="keyword">int</span> <a class="link" href="axis_base.html#idm541226238960-bb"><span class="identifier">shape</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
-  <span class="keyword">bool</span> <a class="link" href="axis_base.html#idm541226237616-bb"><span class="identifier">uoflow</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
-  <span class="identifier">string_view</span> <a class="link" href="axis_base.html#idm541226236272-bb"><span class="identifier">label</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
-  <span class="keyword">void</span> <a class="link" href="axis_base.html#idm541226234928-bb"><span class="identifier">label</span></a><span class="special">(</span><span class="identifier">string_view</span><span class="special">)</span><span class="special">;</span>
+  <span class="comment">// <a class="link" href="axis_base.html#idm419073174080-bb">public member functions</a></span>
+  <span class="keyword">int</span> <a class="link" href="axis_base.html#idm419073173552-bb"><span class="identifier">size</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
+  <span class="keyword">int</span> <a class="link" href="axis_base.html#idm419073172208-bb"><span class="identifier">shape</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
+  <span class="keyword">bool</span> <a class="link" href="axis_base.html#idm419073170864-bb"><span class="identifier">uoflow</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
+  <span class="identifier">string_view</span> <a class="link" href="axis_base.html#idm419073169520-bb"><span class="identifier">label</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
+  <span class="keyword">void</span> <a class="link" href="axis_base.html#idm419073168176-bb"><span class="identifier">label</span></a><span class="special">(</span><span class="identifier">string_view</span><span class="special">)</span><span class="special">;</span>
+  <span class="identifier">const_iterator</span> <a class="link" href="axis_base.html#idm419073166464-bb"><span class="identifier">begin</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
+  <span class="identifier">const_iterator</span> <a class="link" href="axis_base.html#idm419073165440-bb"><span class="identifier">end</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
+  <span class="identifier">const_reverse_iterator</span> <a class="link" href="axis_base.html#idm419073164416-bb"><span class="identifier">rbegin</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
+  <span class="identifier">const_reverse_iterator</span> <a class="link" href="axis_base.html#idm419073163376-bb"><span class="identifier">rend</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
 
-  <span class="comment">// <a class="link" href="axis_base.html#idm541226233072-bb">protected member functions</a></span>
-  <span class="keyword">bool</span> <a class="link" href="axis_base.html#idm541226232544-bb"><span class="keyword">operator</span><span class="special">==</span></a><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
+  <span class="comment">// <a class="link" href="axis_base.html#idm419073162192-bb">protected member functions</a></span>
+  <span class="keyword">bool</span> <a class="link" href="axis_base.html#idm419073161664-bb"><span class="keyword">operator</span><span class="special">==</span></a><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span>
 
-  <span class="comment">// <a class="link" href="axis_base.html#idm541226221664-bb">private member functions</a></span>
-  <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Archive<span class="special">&gt;</span> <span class="keyword">void</span> <a class="link" href="axis_base.html#idm541226221136-bb"><span class="identifier">serialize</span></a><span class="special">(</span><span class="identifier">Archive</span> <span class="special">&amp;</span><span class="special">,</span> <span class="keyword">unsigned</span><span class="special">)</span><span class="special">;</span>
+  <span class="comment">// <a class="link" href="axis_base.html#idm419073150784-bb">private member functions</a></span>
+  <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Archive<span class="special">&gt;</span> <span class="keyword">void</span> <a class="link" href="axis_base.html#idm419073150256-bb"><span class="identifier">serialize</span></a><span class="special">(</span><span class="identifier">Archive</span> <span class="special">&amp;</span><span class="special">,</span> <span class="keyword">unsigned</span><span class="special">)</span><span class="special">;</span>
 <span class="special">}</span><span class="special">;</span></pre></div>
 <div class="refsect1">
-<a name="idm500181412000"></a><h2>Description</h2>
+<a name="idm387827240976"></a><h2>Description</h2>
 <div class="refsect2">
-<a name="idm500181411600"></a><h3>
+<a name="idm387827240576"></a><h3>
 <a name="boost.histogram.axis.axis_baseconstruct-copy-destruct"></a><code class="computeroutput">axis_base</code> 
         public
        construct/copy/destruct</h3>
 <div class="orderedlist"><ol class="orderedlist" type="1">
-<li class="listitem"><pre class="literallayout"><a name="idm541226230320-bb"></a><span class="identifier">axis_base</span><span class="special">(</span><span class="keyword">unsigned</span> n<span class="special">,</span> <span class="identifier">string_view</span> label<span class="special">)</span><span class="special">;</span></pre></li>
-<li class="listitem"><pre class="literallayout"><a name="idm541226228768-bb"></a><span class="identifier">axis_base</span><span class="special">(</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span></pre></li>
-<li class="listitem"><pre class="literallayout"><a name="idm541226228256-bb"></a><span class="identifier">axis_base</span><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span></pre></li>
-<li class="listitem"><pre class="literallayout"><a name="idm541226224576-bb"></a><span class="identifier">axis_base</span><span class="special">(</span><a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;&amp;</span> rhs<span class="special">)</span><span class="special">;</span></pre></li>
-<li class="listitem"><pre class="literallayout"><a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span> <a name="idm541226226688-bb"></a><span class="keyword">operator</span><span class="special">=</span><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span></pre></li>
-<li class="listitem"><pre class="literallayout"><a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span> <a name="idm541226223392-bb"></a><span class="keyword">operator</span><span class="special">=</span><span class="special">(</span><a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;&amp;</span> rhs<span class="special">)</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><a name="idm419073159440-bb"></a><span class="identifier">axis_base</span><span class="special">(</span><span class="keyword">unsigned</span> n<span class="special">,</span> <span class="identifier">string_view</span> label<span class="special">)</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><a name="idm419073157888-bb"></a><span class="identifier">axis_base</span><span class="special">(</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><a name="idm419073157376-bb"></a><span class="identifier">axis_base</span><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><a name="idm419073153696-bb"></a><span class="identifier">axis_base</span><span class="special">(</span><a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;&amp;</span> rhs<span class="special">)</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span> <a name="idm419073155808-bb"></a><span class="keyword">operator</span><span class="special">=</span><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span><span class="special">)</span> <span class="special">=</span> <span class="keyword">default</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span> <a name="idm419073152512-bb"></a><span class="keyword">operator</span><span class="special">=</span><span class="special">(</span><a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;&amp;</span> rhs<span class="special">)</span><span class="special">;</span></pre></li>
 </ol></div>
 </div>
 <div class="refsect2">
-<a name="idm500181373248"></a><h3>
-<a name="idm541226240832-bb"></a><code class="computeroutput">axis_base</code> public member functions</h3>
+<a name="idm387827202240"></a><h3>
+<a name="idm419073174080-bb"></a><code class="computeroutput">axis_base</code> public member functions</h3>
 <div class="orderedlist"><ol class="orderedlist" type="1">
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">int</span> <a name="idm541226240304-bb"></a><span class="identifier">size</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre>Returns the number of bins, excluding overflow/underflow. </li>
+<pre class="literallayout"><span class="keyword">int</span> <a name="idm419073173552-bb"></a><span class="identifier">size</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre>Returns the number of bins, excluding overflow/underflow. </li>
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">int</span> <a name="idm541226238960-bb"></a><span class="identifier">shape</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre>Returns the number of bins, including overflow/underflow. </li>
+<pre class="literallayout"><span class="keyword">int</span> <a name="idm419073172208-bb"></a><span class="identifier">shape</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre>Returns the number of bins, including overflow/underflow. </li>
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">bool</span> <a name="idm541226237616-bb"></a><span class="identifier">uoflow</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre>Returns true if axis has extra overflow and underflow bins. </li>
+<pre class="literallayout"><span class="keyword">bool</span> <a name="idm419073170864-bb"></a><span class="identifier">uoflow</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre>Returns true if axis has extra overflow and underflow bins. </li>
 <li class="listitem">
-<pre class="literallayout"><span class="identifier">string_view</span> <a name="idm541226236272-bb"></a><span class="identifier">label</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre>Returns the axis label, which is a name or description. </li>
+<pre class="literallayout"><span class="identifier">string_view</span> <a name="idm419073169520-bb"></a><span class="identifier">label</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre>Returns the axis label, which is a name or description. </li>
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">void</span> <a name="idm541226234928-bb"></a><span class="identifier">label</span><span class="special">(</span><span class="identifier">string_view</span> label<span class="special">)</span><span class="special">;</span></pre>Change the label of an axis. </li>
+<pre class="literallayout"><span class="keyword">void</span> <a name="idm419073168176-bb"></a><span class="identifier">label</span><span class="special">(</span><span class="identifier">string_view</span> label<span class="special">)</span><span class="special">;</span></pre>Change the label of an axis. </li>
+<li class="listitem"><pre class="literallayout"><span class="identifier">const_iterator</span> <a name="idm419073166464-bb"></a><span class="identifier">begin</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><span class="identifier">const_iterator</span> <a name="idm419073165440-bb"></a><span class="identifier">end</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><span class="identifier">const_reverse_iterator</span> <a name="idm419073164416-bb"></a><span class="identifier">rbegin</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre></li>
+<li class="listitem"><pre class="literallayout"><span class="identifier">const_reverse_iterator</span> <a name="idm419073163376-bb"></a><span class="identifier">rend</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre></li>
 </ol></div>
 </div>
 <div class="refsect2">
-<a name="idm500181344720"></a><h3>
-<a name="idm541226233072-bb"></a><code class="computeroutput">axis_base</code> protected member functions</h3>
-<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><pre class="literallayout"><span class="keyword">bool</span> <a name="idm541226232544-bb"></a><span class="keyword">operator</span><span class="special">==</span><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class axis_base">axis_base</a> <span class="special">&amp;</span> rhs<span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre></li></ol></div>
+<a name="idm387827152528"></a><h3>
+<a name="idm419073162192-bb"></a><code class="computeroutput">axis_base</code> protected member functions</h3>
+<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><pre class="literallayout"><span class="keyword">bool</span> <a name="idm419073161664-bb"></a><span class="keyword">operator</span><span class="special">==</span><span class="special">(</span><span class="keyword">const</span> <a class="link" href="axis_base.html" title="Class template axis_base">axis_base</a> <span class="special">&amp;</span> rhs<span class="special">)</span> <span class="keyword">const</span> <span class="keyword">noexcept</span><span class="special">;</span></pre></li></ol></div>
 </div>
 <div class="refsect2">
-<a name="idm500181334880"></a><h3>
-<a name="idm541226221664-bb"></a><code class="computeroutput">axis_base</code> private member functions</h3>
-<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><pre class="literallayout"><span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Archive<span class="special">&gt;</span> <span class="keyword">void</span> <a name="idm541226221136-bb"></a><span class="identifier">serialize</span><span class="special">(</span><span class="identifier">Archive</span> <span class="special">&amp;</span><span class="special">,</span> <span class="keyword">unsigned</span><span class="special">)</span><span class="special">;</span></pre></li></ol></div>
+<a name="idm387827142624"></a><h3>
+<a name="idm419073150784-bb"></a><code class="computeroutput">axis_base</code> private member functions</h3>
+<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem"><pre class="literallayout"><span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Archive<span class="special">&gt;</span> <span class="keyword">void</span> <a name="idm419073150256-bb"></a><span class="identifier">serialize</span><span class="special">(</span><span class="identifier">Archive</span> <span class="special">&amp;</span><span class="special">,</span> <span class="keyword">unsigned</span><span class="special">)</span><span class="special">;</span></pre></li></ol></div>
 </div>
 </div>
 </div>
