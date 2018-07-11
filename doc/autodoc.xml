@@ -1005,11 +1005,11 @@
     </template><inherit access="public">iterator_facade&lt; iterator_over&lt; Histogram, Storage &gt;, Storage::element_type, bidirectional_traversal_tag, Storage::const_reference &gt;</inherit><method-group name="public member functions">
 <method name="bin" cv="const"><type>auto</type></method>
 <method name="bin" cv="const"><type>auto</type><template>
-          <template-nontype-parameter name="N"><type>int</type></template-nontype-parameter>
-        </template><parameter name=""><paramtype>mpl::int_&lt; N &gt;</paramtype></parameter></method>
+          <template-nontype-parameter name="Dim"><type>int</type></template-nontype-parameter>
+        </template><parameter name=""><paramtype>mpl::int_&lt; Dim &gt;</paramtype></parameter></method>
 <method name="bin" cv="const"><type>auto</type><template>
-          <template-type-parameter name="Int"/>
-        </template><parameter name="dim"><paramtype>Int</paramtype></parameter></method>
+          <template-type-parameter name="T"><default>Histogram</default></template-type-parameter>
+        </template><parameter name="dim"><paramtype>unsigned</paramtype></parameter></method>
 </method-group>
 <constructor><parameter name="h"><paramtype>const Histogram &amp;</paramtype></parameter><parameter name="s"><paramtype>const Storage &amp;</paramtype></parameter><parameter name="idx"><paramtype>std::size_t</paramtype></parameter></constructor>
 <constructor cv="= default"><parameter name=""><paramtype>const iterator_over &amp;</paramtype></parameter></constructor>
