@@ -132,7 +132,7 @@
 </ul></div>
 <p>
             Use the factory function <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>
-            (or <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm525624318240">make_dynamic_histogram</a></code>,
+            (or <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm336267474368">make_dynamic_histogram</a></code>,
             respectively) to make histograms with the default storage policy. The
             default storage policy makes sure that counting is safe, fast, and memory
             efficient. If you are curious about trying another storage policy or
@@ -189,7 +189,7 @@
 <p>
             <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>
             cannot handle this case because a static histogram can only be constructed
-            when the number of types of all axes are known already at compile time.
+            when the number and types of all axes are known already at compile time.
             While strictly speaking that is also true in this example, you could
             have filled the vector also at run-time, based on run-time user input.
           </p>
@@ -326,11 +326,11 @@
 </tr>
 <tr><td align="left" valign="top"><p>
               The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/circular.html" title="Class template circular">circular axis</a></code>
-              never creates under- and overflow bins, because the axis is circular.
-              The highest bin wrapps around to the lowest bin and vice versa, so
-              there is no possibility for overflow. Similarly, the <code class="computeroutput"><a class="link" href="../boost/histogram/axis/category.html" title="Class template category">category
-              axis</a></code> has under- and overflow bins, because these terms
-              have no meaning for categorical variables.
+              never creates under- and overflow bins. The highest bin wraps around
+              to the lowest bin and vice versa, so there is no possibility for overflow.
+              Similarly, the <code class="computeroutput"><a class="link" href="../boost/histogram/axis/category.html" title="Class template category">category
+              axis</a></code> comes without under- and overflow bins, because these
+              terms have no meaning for categorical variables.
             </p></td></tr>
 </table></div>
 </div>
@@ -340,8 +340,8 @@
 <a name="histogram.guide.cpp.fill_histogram"></a><a class="link" href="guide.html#histogram.guide.cpp.fill_histogram" title="Fill histogram">Fill histogram</a>
 </h4></div></div></div>
 <p>
-          After you created a histogram, you want to insert (possibly multi-dimensional)
-          data. This is done with the flexible <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code> call, which you typically do in a
+          After you created a histogram, you want to insert tuples of possibly multi-dimensional
+          and heterogenous values. This is done with the flexible <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code> call, which you typically do in a
           loop. Some extra parameters can be passed to the method as shown in the
           next example.
         </p>
@@ -383,16 +383,10 @@
 <p>
           <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
           either takes <code class="computeroutput"><span class="identifier">N</span></code> arguments
-          or one container with <code class="computeroutput"><span class="identifier">N</span></code>
-          elements, where <code class="computeroutput"><span class="identifier">N</span></code> is equal
-          to the number of axes of the histogram, finds the corresponding bin, and
-          increments the bin counter by one.
-        </p>
-<p>
-          This library was designed to feel familiar to users of <a href="../../../libs/accumulators/index.html" target="_top">Boost.Accumulators</a>
-          and to make it compatible with <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span></code>,
-          that's why values are filled with <code class="computeroutput"><span class="keyword">operator</span><span class="special">()</span></code>. If you have the input values in a collection,
-          <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span></code> fills the histogram in one line.
+          or a container with <code class="computeroutput"><span class="identifier">N</span></code> elements,
+          where <code class="computeroutput"><span class="identifier">N</span></code> is equal to the
+          number of axes of the histogram. It finds the corresponding bin, and increments
+          the bin counter by one.
         </p>
 <p>
           <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">),</span> <span class="special">...)</span></code> does the same as the first call, but
@@ -1282,7 +1276,7 @@
           Histograms can be created with a different storage policy than the default
           <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class adaptive_storage">adaptive_storage</a></code>,
           using the templated factories <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram_with">make_static_histogram_with</a></code>
-          and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm525624312992">make_dynamic_histogram_with</a></code>.
+          and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm336267469120">make_dynamic_histogram_with</a></code>.
         </p>
 <p>
           A simple alternative, <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">array_storage</a></code>,

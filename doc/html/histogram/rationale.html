@@ -56,7 +56,7 @@
         from the <a href="https://eigen.tuxfamily.org/" target="_top">Eigen library</a>.
       </p>
 <p>
-        Three design goals of the library:
+        Design goals of the library:
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
@@ -77,6 +77,12 @@
             expose this, which forces the user to make a choice which is potentially
             dangerous. At best, the choice is merely inefficient. In the worst case,
             it can lead to information loss in form of overflowing or capped counters.
+          </li>
+<li class="listitem">
+            STL compatibility. If the histogram is compatible with STL algorithms,
+            many tasks are one-liners. It should also feel familiar to users of
+            <a href="../../../libs/accumulators/index.html" target="_top">Boost.Accumulators</a>.
+            That's why values are filled with <code class="computeroutput"><span class="keyword">operator</span><span class="special">()</span></code>.
           </li>
 </ul></div>
 </div>
