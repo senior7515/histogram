@@ -6,69 +6,92 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth=1024")
-endif()
-
 # setup build
-option(BUILD_PYTHON "Build python bindings" ON)
-option(BUILD_NUMPY_SUPPORT "Build numpy support" ON)
+option(BUILD_PYTHON "Build python bindings" OFF)
+option(BUILD_NUMPY "Build numpy support" ON)
 option(BUILD_CHECKS "Build auxillary checks" OFF)
+option(BUILD_SERIALIZATION "Build serialization code" ON)
 option(TRACE_ALLOCS "Debug: Trace allocations" OFF)
+option(SANITIZE "Debug: Compile with santizers" OFF)
 mark_as_advanced(TRACE_ALLOCS)
+mark_as_advanced(SANITIZE)
 
-if(CMAKE_BUILD_TYPE)
-  STRING(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+# set build type if none is specified
+set(default_build_type "RELEASE")
+if (EXISTS "${PROJECT_SOURCE_DIR}/../.git")
+  set(default_build_type "Debug")
 endif()
 
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
-  add_definitions(/W3)
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
+  set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
+      STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  add_definitions(-Wall)
+
+# set special compiler flags
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  add_compile_options(/W4)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wall -Wextra -pedantic)
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6)
     # -fpermissive needed for cpp_int in gcc-6
     # -Wno-noexcept-type to silence warnings related to Boost.Python
-    add_definitions(-fpermissive -Wno-noexcept-type)
+    add_compile_options(-fpermissive -Wno-noexcept-type)
   endif()
-endif()
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  add_definitions(-Wall)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_compile_options(-Wall -Wextra -pedantic -D__STRICT_ANSI__ -ftemplate-depth=1024)
 endif()
 
 if(TRACE_ALLOCS)
-  add_definitions(-DBOOST_HISTOGRAM_TRACE_ALLOCS)
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(/DBOOST_HISTOGRAM_TRACE_ALLOCS)
+  else()
+    add_compile_options(-DBOOST_HISTOGRAM_TRACE_ALLOCS)
+  endif()
 endif()
 
 if(BUILD_PYTHON)
-  if(DEFINED PYTHON_VERSION)
-    find_package(PythonLibs ${PYTHON_VERSION} EXACT REQUIRED)
-  else()
-    find_package(PythonLibs REQUIRED)
+  # We need both find_packge(PythonInterp) and find_package(PythonLibs),
+  # but as of cmake-3.11.4, cmake is not able to find matching versions of
+  # libs and interpreter. So we just discover the python executable (can be
+  # overriden with -DPYTHON_EXECUTABLE=/path/to/python in the shell) and
+  # use Python facilities to find the correct libs and header paths.
+  if(NOT DEFINED PYTHON_EXECUTABLE)
+    find_package(PythonInterp REQUIRED)
   endif()
 
-  message(STATUS "Python lib: ${PYTHON_LIBRARIES} (MUST match what Boost.Python was compiled against)")
-  message(STATUS "Python include: ${PYTHON_INCLUDE_DIRS}")
-  include_directories(${PYTHON_INCLUDE_DIRS})
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/get_python_include.py
+                  OUTPUT_VARIABLE PYTHON_INCLUDE)
 
-  # used by python_suite_test, version is matched with PythonLibs
-  # automatically in cmake-3.9.6, but this seems not to be the case in older
-  # cmake versions
-  find_package(PythonInterp ${PYTHONLIBS_VERSION_STRING} EXACT REQUIRED)
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/get_python_library.py
+                  OUTPUT_VARIABLE PYTHON_LIBRARY)
 
-  if (PYTHON_VERSION_MAJOR EQUAL 3)
-    set(BOOST_PYTHON_NAME python3)
-  else()
-    set(BOOST_PYTHON_NAME python)
-  endif()
+  message(STATUS "Python include: ${PYTHON_INCLUDE}")
+  message(STATUS "Python lib: ${PYTHON_LIBRARY}")
+  message(STATUS "Beware: Python lib MUST match what Boost.Python was compiled against")
+  include_directories(${PYTHON_INCLUDE})
 
-  if(BUILD_NUMPY_SUPPORT)
-    find_package(Boost 1.63 REQUIRED
-                 COMPONENTS iostreams serialization ${BOOST_PYTHON_NAME} numpy)
+  find_package(Boost 1.63 REQUIRED COMPONENTS iostreams serialization)
+  set(LIBRARIES ${Boost_LIBRARIES} ${PYTHON_LIBRARY})
+
+  find_library(Boost_PYTHON
+               NAMES boost_python boost_python${PYTHON_VERSION_MAJOR} boost_python${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+               PATHS ${Boost_LIBRARY_DIRS}
+               NO_DEFAULT_PATH)
+  list(APPEND LIBRARIES ${Boost_PYTHON})
+  message(STATUS "Found boost_python: ${Boost_PYTHON}")
+
+  if(BUILD_NUMPY)
+    find_library(Boost_NUMPY
+                 NAMES boost_numpy boost_numpy${PYTHON_VERSION_MAJOR} boost_numpy${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR}
+                 PATHS ${Boost_LIBRARY_DIRS}
+                 NO_DEFAULT_PATH)
+    message(STATUS "Found boost_numpy: ${Boost_NUMPY}")
     add_definitions(-DHAVE_NUMPY)
-  else()
-    find_package(Boost 1.63
-                 COMPONENTS iostreams serialization ${BOOST_PYTHON_NAME})
+    list(APPEND LIBRARIES ${Boost_NUMPY})
   endif()
 
   add_library(histogram SHARED
@@ -76,49 +99,41 @@ if(BUILD_PYTHON)
     ../src/python/axis.cpp
     ../src/python/histogram.cpp
   )
-  set(LIBRARIES ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
   target_link_libraries(histogram ${LIBRARIES})
   set_target_properties(histogram PROPERTIES PREFIX "" SUFFIX ".so")
 else()
-  find_package(Boost 1.63 REQUIRED
-               COMPONENTS serialization)
+  # serialization only required for tests
+  if (BUILD_SERIALIZATION)
+    find_package(Boost 1.63 REQUIRED serialization)
+    add_definitions(-DHAVE_SERIALIZATION)
+  else ()
+    find_package(Boost 1.63 REQUIRED)
+  endif()
   set(LIBRARIES ${Boost_LIBRARIES})
 endif()
 
 include_directories(../include ${Boost_INCLUDE_DIRS})
 
-if(CMAKE_BUILD_TYPE MATCHES debug)
-  add_definitions(-O0 -g -fno-sanitize-recover=undefined)
-  set(CMAKE_LD_FLAGS ${CMAKE_LD_FLAGS} -fno-sanitize-recover=undefined)
-  message(STATUS "Build type: DEBUG [optimizations off]")
-elseif(CMAKE_BUILD_TYPE MATCHES cov)
+if(CMAKE_BUILD_TYPE MATCHES coverage)
   add_definitions(-O0 -g)
   set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} --coverage)
-  message(STATUS "Build type: COVERAGE [optimizations off]")
-elseif(CMAKE_BUILD_TYPE MATCHES perf)
-  message(STATUS "Build type: PERF [optimizations on]")
-  add_definitions(-O3)
-  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -DBOOST_DISABLE_ASSERTS)
-  set(BUILD_CHECKS ON)
-else()
-  message(STATUS "Build type: RELEASE [optimizations on]")
+elseif(CMAKE_BUILD_TYPE MATCHES release)
   if(MSVC)
     add_definitions(/DBOOST_DISABLE_ASSERTS)
   else()
-    add_definitions(-O3 -DBOOST_DISABLE_ASSERTS)
+    add_definitions(-DBOOST_DISABLE_ASSERTS)
   endif()
 endif()
 
-# sync examples in documentation with example folder
-add_custom_target(sync_examples ALL COMMAND python ${PROJECT_SOURCE_DIR}/../doc/sync_code.py)
-
 # checks
 if(BUILD_CHECKS)
+  add_executable(axis_size ../test/axis_size.cpp)
+  # find_package(benchmark)
   add_executable(speed_cpp ../test/speed_cpp.cpp)
+  # target_link_libraries(speed_cpp -lbenchmark -lpthread)
   if (BUILD_PYTHON)
     configure_file(../test/speed_numpy.py speed_numpy.py)
   endif()
-  add_executable(axis_size ../test/axis_size.cpp)
 endif()
 
 # tests
@@ -130,10 +145,9 @@ if(BUILD_PYTHON)
     if (SRC MATCHES "/([_a-zA-Z0-9]+)\\.py")
       set(TESTNAME ${CMAKE_MATCH_1})
       file(READ ${SRC} SRC_CONTENT)
-      if (BUILD_NUMPY_SUPPORT OR
-          (NOT BUILD_NUMPY_SUPPORT AND NOT SRC_CONTENT MATCHES "^import numpy|\nimport numpy"))
-        configure_file(${SRC} ${TESTNAME}.py)
-        add_test(${TESTNAME} ${PYTHON_EXECUTABLE} ${TESTNAME}.py)
+      if (BUILD_NUMPY OR
+          (NOT BUILD_NUMPY AND NOT SRC_CONTENT MATCHES "^import numpy|\nimport numpy"))
+        add_test(${TESTNAME} ${PYTHON_EXECUTABLE} ${SRC})
       endif()
     endif()
   endforeach()
@@ -143,6 +157,9 @@ file(GLOB TEST_SOURCES ../test/*_test.cpp ../examples/*.cpp)
 foreach(SRC IN ITEMS ${TEST_SOURCES})
   if(SRC MATCHES "/([_a-zA-Z0-9]+)\\.cpp")
     set(BASENAME ${CMAKE_MATCH_1})
+    if (NOT BUILD_SERIALIZATION AND BASENAME MATCHES "serialization")
+      continue()
+    endif()
     file(READ ${SRC} SRC_CONTENT)
     if(SRC_CONTENT MATCHES "BOOST_PYTHON_MODULE\\(([a-z_]+)\\)")
       if(BUILD_PYTHON)
@@ -152,9 +169,20 @@ foreach(SRC IN ITEMS ${TEST_SOURCES})
       endif()
     else()
       add_executable(${BASENAME} ${SRC})
-      add_dependencies(${BASENAME} sync_examples)
-      target_link_libraries(${BASENAME} ${LIBRARIES})
-      add_test(${BASENAME} ${BASENAME})
+      if (SANITIZE)
+        target_compile_options(${BASENAME} PRIVATE -fsanitize=address,undefined)
+        target_link_libraries(${BASENAME} -lasan -lubsan ${LIBRARIES})
+      else()
+        target_link_libraries(${BASENAME} ${LIBRARIES})
+      endif()
+      if (BASENAME MATCHES "fail")
+        if (DEFINED PYTHON_EXECUTABLE)
+          add_test(NAME ${BASENAME} COMMAND ${PYTHON_EXECUTABLE}
+                   ../test/pass_on_fail.py ${BASENAME})
+        endif()
+      else()
+        add_test(${BASENAME} ${BASENAME})
+      endif()
     endif()
   endif()
 endforeach()

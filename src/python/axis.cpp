@@ -8,9 +8,8 @@
 #include <boost/histogram/histogram_fwd.hpp>
 #include <boost/histogram/axis/axis.hpp>
 #include <boost/histogram/axis/any.hpp>
-#include <boost/histogram/axis/bin_view.hpp>
 #include <boost/histogram/axis/ostream_operators.hpp>
-#include <boost/math/constants/constants.hpp>
+#include <boost/histogram/detail/utility.hpp>
 #include <boost/python.hpp>
 #include <boost/python/def_visitor.hpp>
 #include <boost/python/raw_function.hpp>
@@ -25,6 +24,7 @@ namespace np = boost::python::numpy;
 #include <vector>
 #include <utility>
 #include <iostream>
+#include <stdexcept>
 
 namespace bp = boost::python;
 namespace bh = boost::histogram;
@@ -45,7 +45,7 @@ struct generic_iterator {
     }
     return iterable[idx++];
   }
-  bp::object self() { return bp::object(*this); }
+  generic_iterator& self() { return *this; }
   bp::object iterable;
   unsigned idx = 0;
   unsigned size = 0;
@@ -76,21 +76,22 @@ struct axis_interval_view_to_python
 bp::object variable_init(bp::tuple args, bp::dict kwargs) {
   bp::object self = args[0];
 
-  if (len(args) < 2) {
+  if (bp::len(args) < 2) {
     PyErr_SetString(PyExc_TypeError, "require at least two arguments");
     bp::throw_error_already_set();
   }
 
   std::vector<double> v;
-  for (int i = 1, n = len(args); i < n; ++i) {
+  for (int i = 1, n = bp::len(args); i < n; ++i) {
     v.push_back(bp::extract<double>(args[i]));
   }
 
   boost::string_view label;
   auto uo = bha::uoflow::on;
-  while (len(kwargs) > 0) {
+  while (bp::len(kwargs) > 0) {
     bp::tuple kv = kwargs.popitem();
-    boost::string_view k(bp::extract<const char*>(kv[0]), bp::len(kv[0]));
+    const char* key_cstr = bp::extract<const char*>(kv[0]);
+    boost::string_view k(key_cstr, bp::len(kv[0]));
     bp::object v = kv[1];
     if (k == "label")
       label = boost::string_view(bp::extract<const char*>(v), bp::len(v));
@@ -121,7 +122,8 @@ bp::object category_init(bp::tuple args, bp::dict kwargs) {
   boost::string_view label;
   while (bp::len(kwargs) > 0) {
     bp::tuple kv = kwargs.popitem();
-    boost::string_view k(bp::extract<const char*>(kv[0]), bp::len(kv[0]));
+    const char* key_cstr = bp::extract<const char*>(kv[0]);
+    boost::string_view k(key_cstr, bp::len(kv[0]));
     bp::object v = kv[1];
     if (k == "label")
       label = boost::string_view(bp::extract<const char*>(v), bp::len(v));
@@ -151,18 +153,14 @@ template <typename T> bp::str axis_get_label(const T& t) {
 }
 
 template <typename A> bp::object axis_getitem(const A &a, int i) {
-  if (i < -1 * a.uoflow() || i >= a.size() + 1 * a.uoflow()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    bp::throw_error_already_set();
-  }
+  if (i < -1 * a.uoflow() || i >= a.size() + 1 * a.uoflow())
+    throw std::out_of_range("index out of bounds");
   return bp::make_tuple(a.lower(i), a.lower(i+1));
 }
 
 template <> bp::object axis_getitem<bha::category<>>(const bha::category<> &a, int i) {
-  if (i < 0 || i >= a.size()) {
-    PyErr_SetString(PyExc_IndexError, "index out of bounds");
-    bp::throw_error_already_set();
-  }
+  if (i < 0 || i >= a.size())
+    throw std::out_of_range("index out of bounds");
   return bp::object(a.value(i));
 }
 
@@ -249,7 +247,7 @@ bha::regular<double, bha::transform::pow>* regular_pow_init(
   return new bha::regular<double, bha::transform::pow>(
       bin, lower, upper,
       {extract<const char*>(pylabel)(),
-       static_cast<std::size_t>(len(pylabel))},
+       static_cast<std::size_t>(bp::len(pylabel))},
       uo, power);
 }
 
@@ -260,7 +258,7 @@ bha::integer<>* integer_init(int lower, int upper,
   const auto uo = with_uoflow ? bha::uoflow::on : bha::uoflow::off;
   return new bha::integer<>(lower, upper,
       {extract<const char*>(pylabel)(),
-       static_cast<std::size_t>(len(pylabel))},
+       static_cast<std::size_t>(bp::len(pylabel))},
       uo);
 }
 
@@ -270,8 +268,10 @@ void register_axis_types() {
   docstring_options dopt(true, true, false);
 
   class_<generic_iterator>("generic_iterator", init<object>())
-    .def("__iter__", &generic_iterator::self)
-    .def("next", &generic_iterator::next);
+    .def("__iter__", &generic_iterator::self, return_internal_reference<>())
+    .def("__next__", &generic_iterator::next) // Python3
+    .def("next", &generic_iterator::next)     // Python2
+    ;
 
   class_<bha::regular<>>(
       "regular",
@@ -281,7 +281,7 @@ void register_axis_types() {
       .def("__init__", make_constructor(regular_init<bha::transform::identity>,
         default_call_policies(),
         (arg("bin"), arg("lower"), arg("upper"),
-         arg("label")="", arg("uoflow")=true)))
+         arg("label") = "", arg("uoflow") = true)))
       .def(axis_suite<bha::regular<>>());
 
 #define BOOST_HISTOGRAM_PYTHON_REGULAR_CLASS(x)                           \
@@ -293,7 +293,7 @@ void register_axis_types() {
       .def("__init__", make_constructor(regular_init<bha::transform::x>,  \
         default_call_policies(),                                          \
         (arg("bin"), arg("lower"), arg("upper"),                          \
-         arg("label")="", arg("uoflow")=true)))                           \
+         arg("label") = "", arg("uoflow") = true)))                       \
       .def(axis_suite<bha::regular<double, bha::transform::x>>())
 
   BOOST_HISTOGRAM_PYTHON_REGULAR_CLASS(log);
@@ -308,7 +308,7 @@ void register_axis_types() {
       .def("__init__", make_constructor(regular_pow_init,
         default_call_policies(),
         (arg("bin"), arg("lower"), arg("upper"), arg("power"),
-         arg("label")="", arg("uoflow")=true)))
+         arg("label") = "", arg("uoflow") = true)))
       .def(axis_suite<bha::regular<double, bha::transform::pow>>());
 
   class_<bha::circular<>>(
@@ -320,7 +320,7 @@ void register_axis_types() {
       no_init)
       .def(init<unsigned, double, double, const char*>(
           (arg("self"), arg("bin"), arg("phase") = 0.0,
-           arg("perimeter") = boost::math::double_constants::two_pi,
+           arg("perimeter") = bh::detail::two_pi,
            arg("label") = "")))
       .def(axis_suite<bha::circular<>>());
 

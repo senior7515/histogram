@@ -14,7 +14,6 @@
 #include <boost/histogram/detail/axis_visitor.hpp>
 #include <boost/histogram/detail/utility.hpp>
 #include <boost/histogram/histogram_fwd.hpp>
-#include <boost/math/constants/constants.hpp>
 #include <boost/variant.hpp>
 #include <limits>
 #include <sstream>
@@ -224,7 +223,8 @@ int main() {
     test_axis_iterator(axis::integer<>(0, 4, ""), 0, 4);
     test_axis_iterator(axis::category<>({A, B, C}, ""), 0, 3);
     test_axis_iterator(any_axis_type(axis::regular<>(5, 0, 1)), 0, 5);
-    BOOST_TEST_THROWS(any_axis_type(axis::category<>({A, B, C})).lower(0), std::runtime_error);
+    BOOST_TEST_THROWS(any_axis_type(axis::category<>({A, B, C})).lower(0),
+                      std::runtime_error);
   }
 
   // any_axis_type_copyable
@@ -300,6 +300,15 @@ int main() {
     }
     BOOST_TEST_NOT(axes == std::vector<any_axis_type>());
     BOOST_TEST(axes == std::vector<any_axis_type>(axes));
+  }
+
+  // any_axis_type_value_to_index_failure
+  {
+    std::string a = "A", b = "B";
+    any_axis_type x = axis::category<std::string>({a, b}, "category");
+    BOOST_TEST_THROWS(x.index(1.5), std::runtime_error);
+    const auto &cx = axis::cast<axis::category<std::string>>(x);
+    BOOST_TEST_EQ(cx.index(b), 1);
   }
 
   // sequence equality

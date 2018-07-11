@@ -9,10 +9,11 @@
 
 #include <algorithm>
 #include <boost/bimap.hpp>
-#include <boost/histogram/axis/bin_view.hpp>
+#include <boost/histogram/axis/interval_view.hpp>
 #include <boost/histogram/axis/iterator.hpp>
+#include <boost/histogram/axis/value_view.hpp>
 #include <boost/histogram/detail/meta.hpp>
-#include <boost/math/constants/constants.hpp>
+#include <boost/histogram/detail/utility.hpp>
 #include <boost/utility/string_view.hpp>
 #include <cmath>
 #include <limits>
@@ -249,7 +250,7 @@ public:
       x = -std::numeric_limits<value_type>::infinity();
     else if (i > n)
       x = std::numeric_limits<value_type>::infinity();
-    else { 
+    else {
       const auto z = value_type(i) / n;
       x = (1.0 - z) * min_ + z * (min_ + delta_ * n);
     }
@@ -297,7 +298,7 @@ public:
    * \param label     description of the axis.
    */
   explicit circular(unsigned n, value_type phase = 0.0,
-                    value_type perimeter = math::double_constants::two_pi,
+                    value_type perimeter = ::boost::histogram::detail::two_pi,
                     string_view label = {})
       : base_type(n, label), phase_(phase), perimeter_(perimeter) {}
 
@@ -533,7 +534,7 @@ public:
   }
 
   template <typename Iterator,
-            typename = ::boost::histogram::detail::is_iterator<Iterator>>
+            typename = ::boost::histogram::detail::requires_iterator<Iterator>>
   category(Iterator begin, Iterator end, string_view label = {})
       : base_type(std::distance(begin, end), label), map_(new map_type()) {
     int index = 0;
@@ -552,7 +553,7 @@ public:
   }
 
   /// Returns the value for the bin index (performs a range check).
-  inline const value_type& value(int idx) const {
+  inline const value_type &value(int idx) const {
     auto it = map_->right.find(idx);
     if (it == map_->right.end())
       throw std::out_of_range("category index out of range");
