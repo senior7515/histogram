@@ -58,74 +58,71 @@
     <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">literals</span><span class="special">;</span> <span class="comment">// enables _c suffix</span>
 
     <span class="comment">/*
-        create a static 1d-histogram with an axis that has 10 equidistant
-        bins on the real line from -1.0 to 2.0, and label it as "x"
+      create a static 1d-histogram with an axis that has 10 equidistant
+      bins on the real line from -1.0 to 2.0, and label it as "x"
     */</span>
     <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span>
-        <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">10</span><span class="special">,</span> <span class="special">-</span><span class="number">1.0</span><span class="special">,</span> <span class="number">2.0</span><span class="special">,</span> <span class="string">"x"</span><span class="special">)</span>
+      <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">6</span><span class="special">,</span> <span class="special">-</span><span class="number">1.0</span><span class="special">,</span> <span class="number">2.0</span><span class="special">,</span> <span class="string">"x"</span><span class="special">)</span>
     <span class="special">);</span>
 
-    <span class="comment">// fill histogram with data, typically this would happen in a loop</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">1.5</span><span class="special">);</span> <span class="comment">// put in underflow bin</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">1.0</span><span class="special">);</span> <span class="comment">// included in first bin, bin interval is semi-open</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">0.5</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">1.1</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0.3</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">1.7</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">2.0</span><span class="special">);</span>  <span class="comment">// put in overflow bin, bin interval is semi-open</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">20.0</span><span class="special">);</span> <span class="comment">// put in overflow bin</span>
+    <span class="comment">// fill histogram with data, typically this happens in a loop</span>
+    <span class="comment">// STL algorithms are supported</span>
+    <span class="keyword">auto</span> <span class="identifier">data</span> <span class="special">=</span> <span class="special">{</span> <span class="special">-</span><span class="number">0.5</span><span class="special">,</span> <span class="number">1.1</span><span class="special">,</span> <span class="number">0.3</span><span class="special">,</span> <span class="number">1.7</span> <span class="special">};</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span><span class="special">(</span><span class="identifier">data</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">data</span><span class="special">.</span><span class="identifier">end</span><span class="special">(),</span> <span class="identifier">h</span><span class="special">);</span>
 
     <span class="comment">/*
-        do a weighted fill using bh::weight, which accepts a double
+      a regular axis is a sequence of semi-open bins; extra under- and
+      overflow bins extend the axis in the default configuration
+      index   :     -1    0    1   2   3   4   5   6
+      bin edge:  -inf -1.0 -0.5 0.0 0.5 1.0 1.5 2.0 inf
     */</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0.1</span><span class="special">,</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">2.5</span><span class="special">));</span>
+    <span class="identifier">h</span><span class="special">(-</span><span class="number">1.5</span><span class="special">);</span> <span class="comment">// put in underflow bin</span>
+    <span class="identifier">h</span><span class="special">(-</span><span class="number">1.0</span><span class="special">);</span> <span class="comment">// included in first bin, bin interval is semi-open</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="number">2.0</span><span class="special">);</span>  <span class="comment">// put in overflow bin, bin interval is semi-open</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="number">20.0</span><span class="special">);</span> <span class="comment">// put in overflow bin</span>
 
     <span class="comment">/*
-        iterate over bins, loop excludes under- and overflow bins
-        - index 0_c is a compile-time number, the only way in C++ to make
-          axis(...) to return a different type for each index
-        - for-loop yields instances of `bin_type`, usually is a semi-open
-          interval representing the bin, whose edges can be accessed with
-          methods `lower()` and `upper()`, but the choice depends on the
-          axis type, please look it up in the reference
-        - `bin(index)` method returns the bin counter at index, you can then
-           access its `value() and `variance()` methods; the first returns the
-           actual count, the second returns a variance estimate of the count;
-           a bin_type is convertible into an index
-           (see Rationale section for what this means)
+      do a weighted fill using bh::weight, a wrapper for any type,
+      which may appear at the beginning of the argument list
     */</span>
-    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">bin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">))</span> <span class="special">{</span>
-        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"bin "</span> <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">idx</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" x in ["</span>
-                  <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">lower</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">upper</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"): "</span>
-                  <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">bin</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" +/- "</span>
-                  <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">sqrt</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">bin</span><span class="special">).</span><span class="identifier">variance</span><span class="special">())</span>
-                  <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">1.0</span><span class="special">),</span> <span class="number">0.1</span><span class="special">);</span>
+
+    <span class="comment">/*
+      iterate over bins with a fancy histogram iterator
+      - order in which bins are iterated over is an implementation detail
+      - iterator dereferences to histogram::element_type, which is defined by
+        its storage class; by default something with value() and
+        variance() methods; the first returns the
+        actual count, the second returns a variance estimate of the count;
+        a bin_type is convertible into an index
+        (see Rationale section for what this means)
+      - idx(N) method returns the index of the N-th axis
+      - bin(N_c) method returns current bin of N-th axis; the suffx _c turns
+        the argument into a compile-time number, which is needed to return
+        different `bin_type`s for different axes
+      - `bin_type` usually is a semi-open interval representing the bin, whose
+        edges can be accessed with methods `lower()` and `upper()`, but the
+        implementation depends on the axis, please look it up in the reference
+    */</span>
+    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">it</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">begin</span><span class="special">();</span> <span class="identifier">it</span> <span class="special">!=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">end</span><span class="special">();</span> <span class="special">++</span><span class="identifier">it</span><span class="special">)</span> <span class="special">{</span>
+      <span class="keyword">const</span> <span class="keyword">auto</span> <span class="identifier">bin</span> <span class="special">=</span> <span class="identifier">it</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">);</span>
+      <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"bin "</span> <span class="special">&lt;&lt;</span> <span class="identifier">it</span><span class="special">.</span><span class="identifier">idx</span><span class="special">(</span><span class="number">0</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">" x in ["</span>
+                <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">lower</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">upper</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"): "</span>
+                <span class="special">&lt;&lt;</span> <span class="identifier">it</span><span class="special">-&gt;</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" +/- "</span>
+                <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">sqrt</span><span class="special">(</span><span class="identifier">it</span><span class="special">-&gt;</span><span class="identifier">variance</span><span class="special">())</span>
+                <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="special">}</span>
 
-    <span class="comment">// accessing under- and overflow bins is easy, use indices -1 and 10</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"underflow bin ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">)[-</span><span class="number">1</span><span class="special">].</span><span class="identifier">lower</span><span class="special">()</span>
-              <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">)[-</span><span class="number">1</span><span class="special">].</span><span class="identifier">upper</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"): "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(-</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" +/- "</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">sqrt</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(-</span><span class="number">1</span><span class="special">).</span><span class="identifier">variance</span><span class="special">())</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"overflow  bin ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">)[</span><span class="number">10</span><span class="special">].</span><span class="identifier">lower</span><span class="special">()</span>
-              <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">)[</span><span class="number">10</span><span class="special">].</span><span class="identifier">upper</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"): "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">10</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" +/- "</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">sqrt</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">10</span><span class="special">).</span><span class="identifier">variance</span><span class="special">())</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="comment">/* program output: (note that under- and overflow bins appear at the end)
 
-    <span class="comment">/* program output:
-
-    bin 0 x in [-1, -0.7): 1 +/- 1
-    bin 1 x in [-0.7, -0.4): 1 +/- 1
-    bin 2 x in [-0.4, -0.1): 0 +/- 0
-    bin 3 x in [-0.1, 0.2): 2.5 +/- 2.5
-    bin 4 x in [0.2, 0.5): 1 +/- 1
-    bin 5 x in [0.5, 0.8): 0 +/- 0
-    bin 6 x in [0.8, 1.1): 4 +/- 2
-    bin 7 x in [1.1, 1.4): 1 +/- 1
-    bin 8 x in [1.4, 1.7): 0 +/- 0
-    bin 9 x in [1.7, 2): 1 +/- 1
-    underflow bin [-inf, -1): 1 +/- 1
-    overflow  bin [2, inf): 2 +/- 1.41421
+    bin 0 x in [-1.0, -0.5): 1 +/- 1
+    bin 1 x in [-0.5,  0.0): 0 +/- 0
+    bin 2 x in [ 0.0,  0.5): 1 +/- 1
+    bin 3 x in [ 0.5,  1.0): 0 +/- 0
+    bin 4 x in [ 1.0,  1.5): 1 +/- 1
+    bin 5 x in [ 1.5,  2.0): 0 +/- 0
+    bin 6 x in [ 2.0, inf): 2 +/- 1.41421
+    bin -1 x in [-inf, -1): 1 +/- 1
 
     */</span>
 <span class="special">}</span>
@@ -168,7 +165,7 @@
     <span class="identifier">br</span><span class="special">::</span><span class="identifier">mt19937</span> <span class="identifier">gen</span><span class="special">;</span>
     <span class="identifier">br</span><span class="special">::</span><span class="identifier">normal_distribution</span><span class="special">&lt;&gt;</span> <span class="identifier">norm</span><span class="special">;</span>
     <span class="keyword">for</span> <span class="special">(</span><span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="number">1000</span><span class="special">;</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span>
-        <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="identifier">i</span> <span class="special">%</span> <span class="number">2</span> <span class="special">?</span> <span class="string">"red"</span> <span class="special">:</span> <span class="string">"blue"</span><span class="special">,</span> <span class="identifier">norm</span><span class="special">(</span><span class="identifier">gen</span><span class="special">),</span> <span class="identifier">norm</span><span class="special">(</span><span class="identifier">gen</span><span class="special">));</span>
+        <span class="identifier">h</span><span class="special">(</span><span class="identifier">i</span> <span class="special">%</span> <span class="number">2</span> <span class="special">?</span> <span class="string">"red"</span> <span class="special">:</span> <span class="string">"blue"</span><span class="special">,</span> <span class="identifier">norm</span><span class="special">(</span><span class="identifier">gen</span><span class="special">),</span> <span class="identifier">norm</span><span class="special">(</span><span class="identifier">gen</span><span class="special">));</span>
 
     <span class="comment">/*
         print dynamic histogram by iterating over bins
@@ -183,7 +180,7 @@
         <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"%s\n"</span><span class="special">,</span> <span class="identifier">cbin</span><span class="special">.</span><span class="identifier">value</span><span class="special">().</span><span class="identifier">c_str</span><span class="special">());</span>
         <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">ybin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">2</span><span class="special">))</span> <span class="special">{</span> <span class="comment">// rows</span>
             <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">xbin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">))</span> <span class="special">{</span> <span class="comment">// columns</span>
-                <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"%3.0f "</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">cbin</span><span class="special">,</span> <span class="identifier">xbin</span><span class="special">,</span> <span class="identifier">ybin</span><span class="special">).</span><span class="identifier">value</span><span class="special">());</span>
+                <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"%3.0f "</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">cbin</span><span class="special">,</span> <span class="identifier">xbin</span><span class="special">,</span> <span class="identifier">ybin</span><span class="special">).</span><span class="identifier">value</span><span class="special">());</span>
             <span class="special">}</span>
             <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"\n"</span><span class="special">);</span>
         <span class="special">}</span>
@@ -223,7 +220,7 @@
 <span class="identifier">y</span> <span class="special">=</span> <span class="number">0.5</span> <span class="special">*</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">random</span><span class="special">.</span><span class="identifier">randn</span><span class="special">(</span><span class="number">1000</span><span class="special">)</span>
 
 <span class="comment"># fill histogram with numpy arrays, this is very fast</span>
-<span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">)</span>
+<span class="identifier">h</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">)</span>
 
 <span class="comment"># get representations of the bin edges as Numpy arrays, this representation</span>
 <span class="comment"># differs from `list(h.axis(0))`, because it is optimised for compatibility</span>
@@ -280,12 +277,12 @@
 
 <span class="comment"># fill histogram with numbers</span>
 <span class="keyword">for</span> <span class="identifier">x</span> <span class="keyword">in</span> <span class="special">(</span><span class="number">2e0</span><span class="special">,</span> <span class="number">2e1</span><span class="special">,</span> <span class="number">2e2</span><span class="special">,</span> <span class="number">2e3</span><span class="special">,</span> <span class="number">2e4</span><span class="special">):</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">weight</span><span class="special">=</span><span class="number">2</span><span class="special">)</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">weight</span><span class="special">=</span><span class="number">2</span><span class="special">)</span>
 
 <span class="comment"># iterate over bins and access bin counter</span>
 <span class="keyword">for</span> <span class="identifier">idx</span><span class="special">,</span> <span class="special">(</span><span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">)</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)):</span>
-    <span class="keyword">print</span> <span class="string">"bin {0} x in [{1}, {2}): {3} +/- {4}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span>
-        <span class="identifier">idx</span><span class="special">,</span> <span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">variance</span> <span class="special">**</span> <span class="number">0.5</span><span class="special">)</span>
+    <span class="keyword">print</span><span class="special">(</span><span class="string">"bin {0} x in [{1}, {2}): {3} +/- {4}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span>
+          <span class="identifier">idx</span><span class="special">,</span> <span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">variance</span> <span class="special">**</span> <span class="number">0.5</span><span class="special">))</span>
 </pre>
 </div>
 </div>

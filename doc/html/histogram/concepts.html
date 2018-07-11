@@ -137,9 +137,12 @@
             be equal comparable
           </li>
 <li class="listitem">
-            have a nested type <code class="computeroutput"><span class="identifier">bin_type</span></code>,
-            the external type used to represent the bin count (internally it may
-            be a different type)
+            have a nested type <code class="computeroutput"><span class="identifier">element_type</span></code>,
+            which represent the bin count
+          </li>
+<li class="listitem">
+            have a nested type <code class="computeroutput"><span class="identifier">const_reference</span></code>,
+            its const reference version
           </li>
 <li class="listitem">
             have a constructor <code class="computeroutput"><span class="identifier">storage_type</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span>
@@ -164,9 +167,7 @@
                   <span class="identifier">x</span><span class="special">)</span></code>
                 </li>
 <li class="listitem">
-                  <code class="computeroutput"><span class="identifier">bin_type</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span>
-                  <span class="identifier">index</span><span class="special">)</span>
-                  <span class="keyword">const</span></code>
+                  <code class="computeroutput"><span class="identifier">const_reference</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">index</span><span class="special">)</span> <span class="keyword">const</span></code>
                 </li>
 <li class="listitem">
                   <code class="computeroutput"><span class="identifier">storage_type</span><span class="special">&amp;</span>

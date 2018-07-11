@@ -132,7 +132,7 @@
 </ul></div>
 <p>
             Use the factory function <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>
-            (or <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm419072869536">make_dynamic_histogram</a></code>,
+            (or <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm236838552160">make_dynamic_histogram</a></code>,
             respectively) to make histograms with the default storage policy. The
             default storage policy makes sure that counting is safe, fast, and memory
             efficient. If you are curious about trying another storage policy or
@@ -341,63 +341,74 @@
 </h4></div></div></div>
 <p>
           After you created a histogram, you want to insert (possibly multi-dimensional)
-          data. This is done with the flexible <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">fill</span><span class="special">(...)</span></code> method, which you typically call in
-          a loop. Some extra parameters can be passed to the method as shown in the
+          data. This is done with the flexible <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code> call, which you typically do in a
+          loop. Some extra parameters can be passed to the method as shown in the
           next example.
         </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">vector</span><span class="special">&gt;</span>
+<span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">utility</span><span class="special">&gt;</span>
 
 <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
 
 <span class="keyword">int</span> <span class="identifier">main</span><span class="special">()</span> <span class="special">{</span>
-    <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_dynamic_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">integer</span><span class="special">&lt;&gt;(</span><span class="number">0</span><span class="special">,</span> <span class="number">4</span><span class="special">),</span>
-                                        <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">10</span><span class="special">,</span> <span class="number">0</span><span class="special">,</span> <span class="number">5</span><span class="special">));</span>
+    <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">integer</span><span class="special">&lt;&gt;(</span><span class="number">0</span><span class="special">,</span> <span class="number">4</span><span class="special">),</span>
+                                       <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">10</span><span class="special">,</span> <span class="number">0</span><span class="special">,</span> <span class="number">5</span><span class="special">));</span>
 
     <span class="comment">// fill histogram, number of arguments must be equal to number of axes</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">4.1</span><span class="special">);</span> <span class="comment">// increases bin counter by one</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">3</span><span class="special">,</span> <span class="number">3.4</span><span class="special">,</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">2</span><span class="special">));</span> <span class="comment">// increase bin counter by 2</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">2</span><span class="special">),</span> <span class="number">3</span><span class="special">,</span> <span class="number">3.4</span><span class="special">);</span> <span class="comment">// the same as the previous call</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">1.1</span><span class="special">);</span> <span class="comment">// increases bin counter by one</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">2</span><span class="special">),</span> <span class="number">3</span><span class="special">,</span> <span class="number">3.4</span><span class="special">);</span> <span class="comment">// increase bin counter by 2 instead of 1</span>
 
-    <span class="comment">// a dynamic histogram also supports fills from an interator range while</span>
-    <span class="comment">// a static histogram does not allow it; using a range of wrong length</span>
-    <span class="comment">// is an error</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;</span> <span class="identifier">values</span> <span class="special">=</span> <span class="special">{</span><span class="number">4</span><span class="special">,</span> <span class="number">3.1</span><span class="special">};</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="identifier">values</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">values</span><span class="special">.</span><span class="identifier">end</span><span class="special">());</span>
+    <span class="comment">// histogram also supports fills from a container of values; a container</span>
+    <span class="comment">// of wrong size trips an assertion in debug mode</span>
+    <span class="keyword">auto</span> <span class="identifier">xy1</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">make_pair</span><span class="special">(</span><span class="number">4</span><span class="special">,</span> <span class="number">3.1</span><span class="special">);</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">xy1</span><span class="special">);</span>
+    <span class="keyword">auto</span> <span class="identifier">xy2</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="keyword">double</span><span class="special">&gt;({</span><span class="number">3.0</span><span class="special">,</span> <span class="number">4.9</span><span class="special">});</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">xy2</span><span class="special">);</span>
+
+    <span class="comment">// functional-style processing is also supported</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">pair</span><span class="special">&lt;</span><span class="keyword">int</span><span class="special">,</span> <span class="keyword">double</span><span class="special">&gt;&gt;</span> <span class="identifier">input_data</span><span class="special">{</span>
+        <span class="special">{</span><span class="number">0</span><span class="special">,</span> <span class="number">1.2</span><span class="special">},</span> <span class="special">{</span><span class="number">2</span><span class="special">,</span> <span class="number">3.4</span><span class="special">},</span> <span class="special">{</span><span class="number">4</span><span class="special">,</span> <span class="number">5.6</span><span class="special">}</span>
+    <span class="special">};</span>
+    <span class="comment">// Note that std::for_each takes the functor by value, thus it makes a</span>
+    <span class="comment">// potentially expensive copy of your histogram. Passing freshly created</span>
+    <span class="comment">// histograms is ok, though, because of return-value-optimization</span>
+    <span class="keyword">auto</span> <span class="identifier">h2</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span><span class="special">(</span><span class="identifier">input_data</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">input_data</span><span class="special">.</span><span class="identifier">end</span><span class="special">(),</span>
+                            <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span>
+                              <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">integer</span><span class="special">&lt;&gt;(</span><span class="number">0</span><span class="special">,</span> <span class="number">4</span><span class="special">),</span>
+                              <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">10</span><span class="special">,</span> <span class="number">0</span><span class="special">,</span> <span class="number">5</span><span class="special">)));</span>
+    <span class="comment">// h is filled</span>
 <span class="special">}</span>
 </pre>
 <p>
-          Here is an explanation for these calls.
+          <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
+          either takes <code class="computeroutput"><span class="identifier">N</span></code> arguments
+          or one container with <code class="computeroutput"><span class="identifier">N</span></code>
+          elements, where <code class="computeroutput"><span class="identifier">N</span></code> is equal
+          to the number of axes of the histogram, finds the corresponding bin, and
+          increments the bin counter by one.
         </p>
-<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
-<li class="listitem">
-              <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">fill</span><span class="special">(...)</span></code>
-              takes <code class="computeroutput"><span class="identifier">N</span></code> arguments,
-              where <code class="computeroutput"><span class="identifier">N</span></code> is equal to
-              the number of axes of the histogram, finds the corresponding bin, and
-              increments the bin counter by one.
-            </li>
-<li class="listitem">
-              <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">fill</span><span class="special">(...,</span>
-              <span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">))</span></code>
-              does the same as the first call, but increments the bin counter by
-              a weight <code class="computeroutput"><span class="identifier">x</span></code>. The type
-              of <code class="computeroutput"><span class="identifier">x</span></code> is not restricted,
-              but usually it is a real number. The position of the <code class="computeroutput"><span class="identifier">weight</span></code> helper class is not restricted,
-              it can appear at any place.
-            </li>
-</ul></div>
 <p>
-          Having more than one <code class="computeroutput"><span class="identifier">weight</span></code>
-          instance in the same call is an error. You can freely mix calls with and
+          This library was designed to feel familiar to users of <a href="../../../libs/accumulators/index.html" target="_top">Boost.Accumulators</a>
+          and to make it compatible with <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span></code>,
+          that's why values are filled with <code class="computeroutput"><span class="keyword">operator</span><span class="special">()</span></code>. If you have the input values in a collection,
+          <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span></code> fills the histogram in one line.
+        </p>
+<p>
+          <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">),</span> <span class="special">...)</span></code> does the same as the first call, but
+          increments the bin counter by the value <code class="computeroutput"><span class="identifier">x</span></code>.
+          The type of <code class="computeroutput"><span class="identifier">x</span></code> is not restricted,
+          usually it is a real number. The <code class="computeroutput"><span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">)</span></code>
+          helper class must be first argument. You can freely mix calls with and
           without a <code class="computeroutput"><span class="identifier">weight</span></code>. Calls
           without a <code class="computeroutput"><span class="identifier">weight</span></code> act like
           the weight is <code class="computeroutput"><span class="number">1</span></code>.
         </p>
 <p>
-          Why weighted increments are sometimes useful, mostly in a scientific context.
-          How weights are handled is explained <a class="link" href="rationale.html#histogram.rationale.weights" title="Support of weighted fills">in
-          the rationale</a>. If you don't see the point, you can just ignore this
-          type of call, this feature does not affect the preformance of the histogram
+          Why weighted increments are sometimes useful, especially in a scientific
+          context, is explained <a class="link" href="rationale.html#histogram.rationale.weights" title="Support of weighted fills">in the
+          rationale</a>. If you don't see the point, you can just ignore this
+          type of call. This feature does not affect the performance of the histogram
           if you don't use it.
         </p>
 <div class="note"><table border="0" summary="Note">
@@ -413,30 +424,9 @@
             This is not necessary for unweighted fills, because the two sums are
             identical is all weights are <code class="computeroutput"><span class="number">1</span></code>.
             The default storage automatically optimizes this case by using only one
-            integral number per bin.
+            integral number per bin as long as no weights are encountered.
           </p></td></tr>
 </table></div>
-<p>
-          In contrast to <a href="../../../libs/accumulators/index.html" target="_top">Boost.Accumulators</a>,
-          this library asks you to write a loop yourself to pass data to the histogram,
-          because that is the most flexible solution. If you prefer a functional
-          programming style, you can use a lambda, as shown in this example.
-        </p>
-<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
-<span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">algorithm</span><span class="special">&gt;</span>
-<span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">vector</span><span class="special">&gt;</span>
-
-<span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
-
-<span class="keyword">int</span> <span class="identifier">main</span><span class="special">()</span> <span class="special">{</span>
-    <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">integer</span><span class="special">&lt;&gt;(</span><span class="number">0</span><span class="special">,</span> <span class="number">9</span><span class="special">));</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="keyword">int</span><span class="special">&gt;</span> <span class="identifier">v</span><span class="special">{</span><span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">,</span> <span class="number">2</span><span class="special">,</span> <span class="number">3</span><span class="special">,</span> <span class="number">4</span><span class="special">,</span> <span class="number">5</span><span class="special">,</span> <span class="number">6</span><span class="special">,</span> <span class="number">7</span><span class="special">,</span> <span class="number">8</span><span class="special">,</span> <span class="number">9</span><span class="special">};</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span><span class="special">(</span><span class="identifier">v</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">v</span><span class="special">.</span><span class="identifier">end</span><span class="special">(),</span>
-        <span class="special">[&amp;</span><span class="identifier">h</span><span class="special">](</span><span class="keyword">int</span> <span class="identifier">x</span><span class="special">)</span> <span class="special">{</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">2.0</span><span class="special">));</span> <span class="special">}</span>
-    <span class="special">);</span>
-    <span class="comment">// h is now filled</span>
-<span class="special">}</span>
-</pre>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
@@ -462,6 +452,7 @@
         </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">iostream</span><span class="special">&gt;</span>
+<span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">numeric</span><span class="special">&gt;</span>
 
 <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
 
@@ -472,43 +463,44 @@
             <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">2</span><span class="special">,</span>  <span class="number">2</span><span class="special">,</span> <span class="number">4</span><span class="special">)</span>
         <span class="special">);</span>
 
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">0.5</span><span class="special">,</span> <span class="number">2.5</span><span class="special">,</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">1</span><span class="special">));</span> <span class="comment">// bin index 0, 0</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">0.5</span><span class="special">,</span> <span class="number">3.5</span><span class="special">,</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">2</span><span class="special">));</span> <span class="comment">// bin index 0, 1</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span> <span class="number">0.5</span><span class="special">,</span> <span class="number">2.5</span><span class="special">,</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">3</span><span class="special">));</span> <span class="comment">// bin index 1, 0</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span> <span class="number">0.5</span><span class="special">,</span> <span class="number">3.5</span><span class="special">,</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">4</span><span class="special">));</span> <span class="comment">// bin index 1, 1</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">1</span><span class="special">),</span> <span class="special">-</span><span class="number">0.5</span><span class="special">,</span> <span class="number">2.5</span><span class="special">);</span> <span class="comment">// bin index 0, 0</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">2</span><span class="special">),</span> <span class="special">-</span><span class="number">0.5</span><span class="special">,</span> <span class="number">3.5</span><span class="special">);</span> <span class="comment">// bin index 0, 1</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">3</span><span class="special">),</span>  <span class="number">0.5</span><span class="special">,</span> <span class="number">2.5</span><span class="special">);</span> <span class="comment">// bin index 1, 0</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">4</span><span class="special">),</span>  <span class="number">0.5</span><span class="special">,</span> <span class="number">3.5</span><span class="special">);</span> <span class="comment">// bin index 1, 1</span>
 
     <span class="comment">// access count value, number of indices must match number of axes</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span>
               <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
 
     <span class="comment">// prints: 1 2 3 4</span>
 
     <span class="comment">// access count variance, number of indices must match number of axes</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">0</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">0</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">0</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">0</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span>
               <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="comment">// prints: 1 4 9 16</span>
 
     <span class="comment">// you can also make a copy of the type that holds the bin count</span>
-    <span class="keyword">auto</span> <span class="identifier">c11</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">);</span>
+    <span class="keyword">auto</span> <span class="identifier">c11</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">);</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">c11</span><span class="special">.</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">c11</span><span class="special">.</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="comment">// prints: 4 16</span>
 
-    <span class="comment">// a dynamic histogram also supports access via an interator range,</span>
-    <span class="comment">// using a range of wrong length is an error</span>
-    <span class="keyword">auto</span> <span class="identifier">h2</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_dynamic_histogram</span><span class="special">(</span>
-            <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">2</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">),</span>
-            <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">2</span><span class="special">,</span>  <span class="number">2</span><span class="special">,</span> <span class="number">4</span><span class="special">)</span>
-        <span class="special">);</span>
+    <span class="comment">// histogram also supports access via container; using a container of</span>
+    <span class="comment">// wrong size trips an assertion in debug mode</span>
+    <span class="keyword">auto</span> <span class="identifier">idx</span> <span class="special">=</span> <span class="special">{</span><span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">};</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="comment">// prints: 2</span>
 
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="keyword">int</span><span class="special">&gt;</span> <span class="identifier">idx</span><span class="special">(</span><span class="number">2</span><span class="special">);</span>
-    <span class="identifier">idx</span> <span class="special">=</span> <span class="special">{</span><span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">};</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h2</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">idx</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">idx</span><span class="special">.</span><span class="identifier">end</span><span class="special">()).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="comment">// histogram also provides extended iterators</span>
+    <span class="keyword">auto</span> <span class="identifier">sum</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">accumulate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">end</span><span class="special">(),</span>
+                               <span class="keyword">typename</span> <span class="keyword">decltype</span><span class="special">(</span><span class="identifier">h</span><span class="special">)::</span><span class="identifier">element_type</span><span class="special">(</span><span class="number">0</span><span class="special">));</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">sum</span><span class="special">.</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">sum</span><span class="special">.</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="comment">// prints: 10 30</span>
 <span class="special">}</span>
 </pre>
 <div class="note"><table border="0" summary="Note">
@@ -517,14 +509,15 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-            The numbers returned by <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code> and <code class="computeroutput"><span class="identifier">variance</span><span class="special">()</span></code> are equal, if weighted fills are not
-            used. The internal structure, which handles the bin counters, has been
-            optimised for this common case. Internally only a single integral number
-            per bin is used until a weighted fill, then the counters internally switch
-            to storing two real numbers per bin. If the very first call to <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">fill</span></code> is already a weighted increment,
-            the two real numbers per bin are allocated directly without any superfluous
-            conversion from integral counters to double counters. This special case
-            is efficiently handled.
+            The numbers returned by <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code> and <code class="computeroutput"><span class="identifier">variance</span><span class="special">()</span></code> are always equal, if weighted fills
+            are not used. The internal structure, which handles the bin counters,
+            has been optimised for this common case. Internally only a single integral
+            number per bin is used until a weighted fill, then the counters internally
+            switch to storing two real numbers per bin. If the very first call to
+            <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
+            is already a weighted increment, the two real numbers per bin are allocated
+            directly without any superfluous conversion from integral counters to
+            double counters. This special case is efficiently handled.
           </p></td></tr>
 </table></div>
 </div>
@@ -584,9 +577,9 @@
 <th align="left">Warning</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-            Because of behavior of the variance, adding a histogram to itself is
-            not identical to multiplying the original histogram by two, as far as
-            the variance is concerned.
+            Because of special behavior of the variance, adding a histogram to itself
+            is not identical to multiplying the original histogram by two, as far
+            as the variance is concerned.
           </p></td></tr>
 </table></div>
 <div class="note"><table border="0" summary="Note">
@@ -613,8 +606,8 @@
     <span class="keyword">auto</span> <span class="identifier">h1</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">2</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">));</span>
     <span class="keyword">auto</span> <span class="identifier">h2</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">2</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">));</span>
 
-    <span class="identifier">h1</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">0.5</span><span class="special">);</span>          <span class="comment">// counts are: 1 0</span>
-    <span class="identifier">h2</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0.5</span><span class="special">);</span>           <span class="comment">// counts are: 0 1</span>
+    <span class="identifier">h1</span><span class="special">(-</span><span class="number">0.5</span><span class="special">);</span>               <span class="comment">// counts are: 1 0</span>
+    <span class="identifier">h2</span><span class="special">(</span><span class="number">0.5</span><span class="special">);</span>                <span class="comment">// counts are: 0 1</span>
 
     <span class="comment">// add them</span>
     <span class="keyword">auto</span> <span class="identifier">h3</span> <span class="special">=</span> <span class="identifier">h1</span><span class="special">;</span>
@@ -625,7 +618,7 @@
     <span class="comment">// accept and return rvalue references where possible</span>
     <span class="keyword">auto</span> <span class="identifier">h4</span> <span class="special">=</span> <span class="identifier">h1</span> <span class="special">+</span> <span class="identifier">h2</span> <span class="special">+</span> <span class="identifier">h3</span><span class="special">;</span> <span class="comment">// counts are: 2 2</span>
 
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h4</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">h4</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h4</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">h4</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="comment">// prints: 2 2</span>
 
     <span class="comment">// multiply by number</span>
@@ -634,7 +627,7 @@
     <span class="comment">// divide by number</span>
     <span class="keyword">auto</span> <span class="identifier">h5</span> <span class="special">=</span> <span class="identifier">h4</span> <span class="special">/</span> <span class="number">4</span><span class="special">;</span>       <span class="comment">// counts are: 1 1</span>
 
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h5</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">h5</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h5</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="identifier">h5</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="comment">// prints: 1 1</span>
 
     <span class="comment">// compare histograms</span>
@@ -643,14 +636,13 @@
 
     <span class="comment">// note: special effect of multiplication on counter variance</span>
     <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">2</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">));</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">0.5</span><span class="special">);</span>          <span class="comment">// counts are: 1 0</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"value    "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="number">2</span> <span class="special">*</span> <span class="identifier">h</span><span class="special">).</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span>
-              <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">h</span> <span class="special">+</span> <span class="identifier">h</span><span class="special">).</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span>
-              <span class="special">&lt;&lt;</span> <span class="string">"variance "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="number">2</span> <span class="special">*</span> <span class="identifier">h</span><span class="special">).</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span>
-              <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">h</span> <span class="special">+</span> <span class="identifier">h</span><span class="special">).</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="identifier">h</span><span class="special">(-</span><span class="number">0.5</span><span class="special">);</span> <span class="comment">// counts are: 1 0</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"value    "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="number">2</span> <span class="special">*</span> <span class="identifier">h</span><span class="special">).</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span>
+              <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">h</span> <span class="special">+</span> <span class="identifier">h</span><span class="special">).</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"\n"</span>
+              <span class="special">&lt;&lt;</span> <span class="string">"variance "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="number">2</span> <span class="special">*</span> <span class="identifier">h</span><span class="special">).</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span>
+              <span class="special">&lt;&lt;</span> <span class="string">" "</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">h</span> <span class="special">+</span> <span class="identifier">h</span><span class="special">).</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">variance</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="comment">// equality operator also checks variances, so the statement is false</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="special">(</span><span class="identifier">h</span> <span class="special">+</span> <span class="identifier">h</span> <span class="special">==</span> <span class="number">2</span> <span class="special">*</span> <span class="identifier">h</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
-
     <span class="comment">/* prints:
         value    2 2
         variance 4 2
@@ -686,16 +678,25 @@
 
 <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
 
+<span class="comment">// example of a generic function for histograms, this one sums all entries</span>
+<span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span><span class="special">...</span> <span class="identifier">Ts</span><span class="special">&gt;</span>
+<span class="keyword">typename</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">&lt;</span><span class="identifier">Ts</span><span class="special">...&gt;::</span><span class="identifier">element_type</span> <span class="identifier">sum</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">&lt;</span><span class="identifier">Ts</span><span class="special">...&gt;&amp;</span> <span class="identifier">h</span><span class="special">)</span> <span class="special">{</span>
+    <span class="keyword">auto</span> <span class="identifier">result</span> <span class="special">=</span> <span class="keyword">typename</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">&lt;</span><span class="identifier">Ts</span><span class="special">...&gt;::</span><span class="identifier">element_type</span><span class="special">(</span><span class="number">0</span><span class="special">);</span>
+    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">x</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">)</span>
+        <span class="identifier">result</span> <span class="special">+=</span> <span class="identifier">x</span><span class="special">;</span>
+    <span class="keyword">return</span> <span class="identifier">result</span><span class="special">;</span>
+<span class="special">}</span>
+
 <span class="keyword">int</span> <span class="identifier">main</span><span class="special">()</span> <span class="special">{</span>
     <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">literals</span><span class="special">;</span> <span class="comment">// enables _c suffix</span>
 
     <span class="comment">// make a 2d histogram</span>
-    <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">4</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">),</span>
+    <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">3</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">),</span>
                                        <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">integer</span><span class="special">&lt;&gt;(</span><span class="number">0</span><span class="special">,</span> <span class="number">4</span><span class="special">));</span>
 
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">0.9</span><span class="special">,</span> <span class="number">0</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0.9</span><span class="special">,</span> <span class="number">3</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0.1</span><span class="special">,</span> <span class="number">2</span><span class="special">);</span>
+    <span class="identifier">h</span><span class="special">(-</span><span class="number">0.9</span><span class="special">,</span> <span class="number">0</span><span class="special">);</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="number">0.9</span><span class="special">,</span> <span class="number">3</span><span class="special">);</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="number">0.1</span><span class="special">,</span> <span class="number">2</span><span class="special">);</span>
 
     <span class="keyword">auto</span> <span class="identifier">hr0</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">reduce_to</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">);</span> <span class="comment">// keep only first axis</span>
     <span class="keyword">auto</span> <span class="identifier">hr1</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">reduce_to</span><span class="special">(</span><span class="number">1</span><span class="identifier">_c</span><span class="special">);</span> <span class="comment">// keep only second axis</span>
@@ -704,25 +705,31 @@
         reduce does not remove counts; returned histograms are summed over
         the removed axes, so h, hr0, and hr1 have same number of total counts
     */</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">sum</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">hr0</span><span class="special">.</span><span class="identifier">sum</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
-              <span class="special">&lt;&lt;</span> <span class="identifier">hr1</span><span class="special">.</span><span class="identifier">sum</span><span class="special">().</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">sum</span><span class="special">(</span><span class="identifier">h</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">sum</span><span class="special">(</span><span class="identifier">hr0</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">sum</span><span class="special">(</span><span class="identifier">hr1</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="comment">// prints: 3 3 3</span>
 
-    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">ybin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="identifier">_c</span><span class="special">))</span> <span class="special">{</span>
-        <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">xbin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">))</span> <span class="special">{</span>
-            <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">xbin</span><span class="special">,</span> <span class="identifier">ybin</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span><span class="special">;</span>
+    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">yi</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="identifier">_c</span><span class="special">))</span> <span class="special">{</span>
+        <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">xi</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">))</span> <span class="special">{</span>
+            <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">xi</span><span class="special">,</span> <span class="identifier">yi</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span><span class="special">;</span>
         <span class="special">}</span>
         <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="special">}</span>
+    <span class="comment">// prints: 1 0 0</span>
+    <span class="comment">//         0 0 0</span>
+    <span class="comment">//         0 1 0</span>
+    <span class="comment">//         0 0 1</span>
 
-    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">abin</span> <span class="special">:</span> <span class="identifier">hr0</span><span class="special">.</span><span class="identifier">axis</span><span class="special">())</span>
-        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">hr0</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">abin</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span><span class="special">;</span>
+    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">xi</span> <span class="special">:</span> <span class="identifier">hr0</span><span class="special">.</span><span class="identifier">axis</span><span class="special">())</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">hr0</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">xi</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span><span class="special">;</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="comment">// prints: 1 1 1</span>
 
-    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">abin</span> <span class="special">:</span> <span class="identifier">hr1</span><span class="special">.</span><span class="identifier">axis</span><span class="special">())</span>
-        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">hr1</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">abin</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span><span class="special">;</span>
+    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">yi</span> <span class="special">:</span> <span class="identifier">hr1</span><span class="special">.</span><span class="identifier">axis</span><span class="special">())</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">hr1</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">yi</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" "</span><span class="special">;</span>
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+    <span class="comment">// prints: 1 0 1 1</span>
 <span class="special">}</span>
 </pre>
 </div>
@@ -798,7 +805,7 @@
 <span class="keyword">int</span> <span class="identifier">main</span><span class="special">()</span> <span class="special">{</span>
     <span class="keyword">auto</span> <span class="identifier">a</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">3</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">,</span> <span class="string">"r"</span><span class="special">),</span>
                                        <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">integer</span><span class="special">&lt;&gt;(</span><span class="number">0</span><span class="special">,</span> <span class="number">2</span><span class="special">,</span> <span class="string">"i"</span><span class="special">));</span>
-    <span class="identifier">a</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0.5</span><span class="special">,</span> <span class="number">1</span><span class="special">);</span>
+    <span class="identifier">a</span><span class="special">(</span><span class="number">0.5</span><span class="special">,</span> <span class="number">1</span><span class="special">);</span>
 
     <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span> <span class="identifier">buf</span><span class="special">;</span> <span class="comment">// holds persistent representation</span>
 
@@ -886,18 +893,18 @@
 
 <span class="comment"># fill histogram with numbers</span>
 <span class="keyword">for</span> <span class="identifier">x</span> <span class="keyword">in</span> <span class="special">(</span><span class="number">2e0</span><span class="special">,</span> <span class="number">2e1</span><span class="special">,</span> <span class="number">2e2</span><span class="special">,</span> <span class="number">2e3</span><span class="special">,</span> <span class="number">2e4</span><span class="special">):</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">weight</span><span class="special">=</span><span class="number">4</span><span class="special">)</span> <span class="comment"># increment bin counter by 4</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">weight</span><span class="special">=</span><span class="number">4</span><span class="special">)</span> <span class="comment"># increment bin counter by 4</span>
 
 <span class="comment"># iterate over bins and access bin counter</span>
 <span class="keyword">for</span> <span class="identifier">idx</span><span class="special">,</span> <span class="special">(</span><span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">)</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)):</span>
-    <span class="keyword">print</span> <span class="string">"bin {0} x in [{1}, {2}): {3} +/- {4}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span>
-        <span class="identifier">idx</span><span class="special">,</span> <span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">variance</span> <span class="special">**</span> <span class="number">0.5</span><span class="special">)</span>
+    <span class="keyword">print</span><span class="special">(</span><span class="string">"bin {0} x in [{1}, {2}): {3} +/- {4}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span>
+        <span class="identifier">idx</span><span class="special">,</span> <span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">variance</span> <span class="special">**</span> <span class="number">0.5</span><span class="special">))</span>
 
 <span class="comment"># under- and overflow bins are accessed like in C++</span>
 <span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)[-</span><span class="number">1</span><span class="special">]</span>
-<span class="keyword">print</span> <span class="string">"underflow [{0}, {1}): {2} +/- {3}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span><span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(-</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(-</span><span class="number">1</span><span class="special">).</span><span class="identifier">variance</span><span class="special">)</span>
+<span class="keyword">print</span><span class="special">(</span><span class="string">"underflow [{0}, {1}): {2} +/- {3}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span><span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(-</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(-</span><span class="number">1</span><span class="special">).</span><span class="identifier">variance</span><span class="special">))</span>
 <span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)[</span><span class="number">5</span><span class="special">]</span>
-<span class="keyword">print</span> <span class="string">"overflow  [{0}, {1}): {2} +/- {3}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span><span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">5</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">5</span><span class="special">).</span><span class="identifier">variance</span><span class="special">)</span>
+<span class="keyword">print</span><span class="special">(</span><span class="string">"overflow  [{0}, {1}): {2} +/- {3}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span><span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">5</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">5</span><span class="special">).</span><span class="identifier">variance</span><span class="special">))</span>
 
 <span class="comment"># prints:</span>
 <span class="comment"># bin 0 x in [1.0, 10.0): 4.0 +/- 4.0</span>
@@ -934,7 +941,7 @@
 <span class="identifier">y</span> <span class="special">=</span> <span class="number">0.5</span> <span class="special">*</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">random</span><span class="special">.</span><span class="identifier">randn</span><span class="special">(</span><span class="number">1000</span><span class="special">)</span>
 
 <span class="comment"># fill histogram with numpy arrays, this is very fast</span>
-<span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">)</span> <span class="comment"># call looks the same as if x, y were values</span>
+<span class="identifier">h</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">)</span> <span class="comment"># call looks the same as if x, y were values</span>
 
 <span class="comment"># get representations of the bin edges as Numpy arrays; this representation</span>
 <span class="comment"># differs from `list(h.axis(0))` as explained in the next example</span>
@@ -956,7 +963,7 @@
     <span class="identifier">plt</span><span class="special">.</span><span class="identifier">savefig</span><span class="special">(</span><span class="string">"example_2d_python.png"</span><span class="special">)</span>
 <span class="keyword">except</span> <span class="identifier">ImportError</span><span class="special">:</span>
     <span class="comment"># ok, no matplotlib, then just print the full count matrix</span>
-    <span class="keyword">print</span> <span class="identifier">count_matrix</span>
+    <span class="keyword">print</span><span class="special">(</span><span class="identifier">count_matrix</span><span class="special">)</span>
 
     <span class="comment"># output of the print looks something like this, the two right-most rows</span>
     <span class="comment"># and two down-most columns represent under-/overflow bins</span>
@@ -979,12 +986,10 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-            The <code class="computeroutput"><span class="identifier">fill</span><span class="special">(...)</span></code>
-            method accepts not only Numpy arrays as arguments, but also any sequence
-            that can be converted into a Numpy array with <code class="computeroutput"><span class="identifier">dtype</span><span class="special">=</span><span class="identifier">float</span></code>.
-            The best performance is achieved, if numpy arrays are used with dtype
-            <code class="computeroutput"><span class="identifier">float</span></code> directly, so that
-            no conversion happens.
+            <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
+            accepts any sequence that can be converted into a Numpy array with <code class="computeroutput"><span class="identifier">dtype</span><span class="special">=</span><span class="keyword">float</span></code> for convenience. To achieve the
+            best performance, use numpy arrays with dtype <code class="computeroutput"><span class="keyword">float</span></code>
+            as input to avoid a conversion.
           </p></td></tr>
 </table></div>
 <p>
@@ -1005,8 +1010,8 @@
     <span class="keyword">if</span> <span class="identifier">idx</span> <span class="special">==</span> <span class="identifier">len</span><span class="special">(</span><span class="identifier">ax</span><span class="special">)-</span><span class="number">1</span><span class="special">:</span>
         <span class="identifier">xedge2</span><span class="special">.</span><span class="identifier">append</span><span class="special">(</span><span class="identifier">upper</span><span class="special">)</span>
 
-<span class="keyword">print</span> <span class="identifier">xedge1</span>
-<span class="keyword">print</span> <span class="identifier">xedge2</span>
+<span class="keyword">print</span><span class="special">(</span><span class="identifier">xedge1</span><span class="special">)</span>
+<span class="keyword">print</span><span class="special">(</span><span class="identifier">xedge2</span><span class="special">)</span>
 
 <span class="comment"># prints:</span>
 <span class="comment"># [ 0.   0.2  0.4  0.6  0.8  1. ]</span>
@@ -1015,7 +1020,7 @@
 <span class="comment"># sequences constructed from an axis use its iterator, the result differs</span>
 <span class="identifier">xedge3</span> <span class="special">=</span> <span class="identifier">list</span><span class="special">(</span><span class="identifier">ax</span><span class="special">)</span>
 
-<span class="keyword">print</span> <span class="identifier">xedge3</span>
+<span class="keyword">print</span><span class="special">(</span><span class="identifier">xedge3</span><span class="special">)</span>
 
 <span class="comment"># prints:</span>
 <span class="comment"># [(0., 0.2), (0.2, 0.4), (0.4, 0.6), (0.8, 1.0)]</span>
@@ -1050,27 +1055,27 @@
           histograms support the Pickle protocol. An example:
         </p>
 <pre class="programlisting"><span class="keyword">import</span> <span class="identifier">histogram</span> <span class="keyword">as</span> <span class="identifier">hg</span>
-<span class="keyword">import</span> <span class="identifier">cPickle</span>
+<span class="keyword">import</span> <span class="identifier">pickle</span>
 
 <span class="identifier">h1</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">2</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">))</span>
 <span class="identifier">h2</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">h1</span><span class="special">)</span> <span class="comment"># creates copy</span>
-<span class="identifier">h1</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(-</span><span class="number">0.5</span><span class="special">)</span>
-<span class="identifier">h2</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0.5</span><span class="special">)</span>
+<span class="identifier">h1</span><span class="special">(-</span><span class="number">0.5</span><span class="special">)</span>
+<span class="identifier">h2</span><span class="special">(</span><span class="number">0.5</span><span class="special">)</span>
 
 <span class="comment"># arithmetic operators (see performance note below)</span>
 <span class="identifier">h3</span> <span class="special">=</span> <span class="identifier">h1</span> <span class="special">+</span> <span class="identifier">h2</span>
 <span class="identifier">h4</span> <span class="special">=</span> <span class="identifier">h3</span> <span class="special">*</span> <span class="number">2</span>
 
-<span class="keyword">print</span> <span class="identifier">h4</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h4</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span>
+<span class="keyword">print</span><span class="special">(</span><span class="identifier">h4</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h4</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">)</span>
 <span class="comment"># prints: 2.0 2.0</span>
 
 <span class="comment"># now save the histogram</span>
-<span class="identifier">with</span> <span class="identifier">open</span><span class="special">(</span><span class="string">"h4_saved.pkl"</span><span class="special">,</span> <span class="string">"w"</span><span class="special">)</span> <span class="keyword">as</span> <span class="identifier">f</span><span class="special">:</span>
-    <span class="identifier">cPickle</span><span class="special">.</span><span class="identifier">dump</span><span class="special">(</span><span class="identifier">h4</span><span class="special">,</span> <span class="identifier">f</span><span class="special">)</span>
-<span class="identifier">with</span> <span class="identifier">open</span><span class="special">(</span><span class="string">"h4_saved.pkl"</span><span class="special">,</span> <span class="string">"r"</span><span class="special">)</span> <span class="keyword">as</span> <span class="identifier">f</span><span class="special">:</span>
-    <span class="identifier">h5</span> <span class="special">=</span> <span class="identifier">cPickle</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">f</span><span class="special">)</span>
+<span class="identifier">with</span> <span class="identifier">open</span><span class="special">(</span><span class="string">"h4_saved.pkl"</span><span class="special">,</span> <span class="string">"wb"</span><span class="special">)</span> <span class="keyword">as</span> <span class="identifier">f</span><span class="special">:</span>
+    <span class="identifier">pickle</span><span class="special">.</span><span class="identifier">dump</span><span class="special">(</span><span class="identifier">h4</span><span class="special">,</span> <span class="identifier">f</span><span class="special">)</span>
+<span class="identifier">with</span> <span class="identifier">open</span><span class="special">(</span><span class="string">"h4_saved.pkl"</span><span class="special">,</span> <span class="string">"rb"</span><span class="special">)</span> <span class="keyword">as</span> <span class="identifier">f</span><span class="special">:</span>
+    <span class="identifier">h5</span> <span class="special">=</span> <span class="identifier">pickle</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">f</span><span class="special">)</span>
 
-<span class="keyword">print</span> <span class="identifier">h4</span> <span class="special">==</span> <span class="identifier">h5</span>
+<span class="keyword">print</span><span class="special">(</span><span class="identifier">h4</span> <span class="special">==</span> <span class="identifier">h5</span><span class="special">)</span>
 <span class="comment"># prints: True</span>
 </pre>
 <div class="note"><table border="0" summary="Note">
@@ -1155,7 +1160,7 @@
 <span class="keyword">void</span> <span class="identifier">process</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">dynamic_histogram</span><span class="special">&lt;&gt;&amp;</span> <span class="identifier">h</span><span class="special">)</span> <span class="special">{</span>
   <span class="comment">// fill histogram, in reality this would be arbitrarily complex code</span>
   <span class="keyword">for</span> <span class="special">(</span><span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="number">4</span><span class="special">;</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span>
-      <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="number">0.25</span> <span class="special">*</span> <span class="identifier">i</span><span class="special">,</span> <span class="identifier">i</span><span class="special">);</span>
+      <span class="identifier">h</span><span class="special">(</span><span class="number">0.25</span> <span class="special">*</span> <span class="identifier">i</span><span class="special">,</span> <span class="identifier">i</span><span class="special">);</span>
 <span class="special">}</span>
 
 <span class="comment">// a minimal Python module, which exposes the process function to Python</span>
@@ -1172,12 +1177,12 @@
 <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">4</span><span class="special">,</span> <span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">),</span>
                  <span class="identifier">bh</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">integer</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">4</span><span class="special">))</span>
 
-<span class="identifier">cpp_filler</span><span class="special">.</span><span class="identifier">process</span><span class="special">(</span><span class="identifier">h</span><span class="special">)</span> <span class="comment"># histogram is filled with input values in C++</span>
+<span class="identifier">cpp_filler</span><span class="special">.</span><span class="identifier">process</span><span class="special">(</span><span class="identifier">h</span><span class="special">)</span>  <span class="comment"># histogram is filled with input values in C++</span>
 
 <span class="keyword">for</span> <span class="identifier">iy</span><span class="special">,</span> <span class="identifier">y</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">)):</span>
     <span class="keyword">for</span> <span class="identifier">ix</span><span class="special">,</span> <span class="identifier">x</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)):</span>
-        <span class="keyword">print</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">ix</span><span class="special">,</span> <span class="identifier">iy</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span>
-    <span class="keyword">print</span>
+        <span class="keyword">print</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">ix</span><span class="special">,</span> <span class="identifier">iy</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">end</span><span class="special">=</span><span class="string">' '</span><span class="special">)</span>
+    <span class="keyword">print</span><span class="special">()</span>
 
 <span class="comment"># prints:</span>
 <span class="comment"># 1.0 0.0 0.0 0.0</span>
@@ -1239,14 +1244,14 @@
 
 <span class="keyword">int</span> <span class="identifier">main</span><span class="special">()</span> <span class="special">{</span>
     <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">custom_axis</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">3</span><span class="special">));</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="string">"-10"</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="string">"0"</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="string">"1"</span><span class="special">);</span>
-    <span class="identifier">h</span><span class="special">.</span><span class="identifier">fill</span><span class="special">(</span><span class="string">"9"</span><span class="special">);</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="string">"-10"</span><span class="special">);</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="string">"0"</span><span class="special">);</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="string">"1"</span><span class="special">);</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="string">"9"</span><span class="special">);</span>
 
-    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">bin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">())</span> <span class="special">{</span>
-        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"bin "</span> <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">idx</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">lower</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span>
-                  <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">upper</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">") "</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="identifier">bin</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span>
+    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">xi</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">())</span> <span class="special">{</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"bin "</span> <span class="special">&lt;&lt;</span> <span class="identifier">xi</span><span class="special">.</span><span class="identifier">idx</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">xi</span><span class="special">.</span><span class="identifier">lower</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span>
+                  <span class="special">&lt;&lt;</span> <span class="identifier">xi</span><span class="special">.</span><span class="identifier">upper</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">") "</span> <span class="special">&lt;&lt;</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">xi</span><span class="special">).</span><span class="identifier">value</span><span class="special">()</span>
                   <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
     <span class="special">}</span>
 
@@ -1277,7 +1282,7 @@
           Histograms can be created with a different storage policy than the default
           <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class adaptive_storage">adaptive_storage</a></code>,
           using the templated factories <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram_with">make_static_histogram_with</a></code>
-          and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm419072864288">make_dynamic_histogram_with</a></code>.
+          and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm236838546912">make_dynamic_histogram_with</a></code>.
         </p>
 <p>
           A simple alternative, <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">array_storage</a></code>,

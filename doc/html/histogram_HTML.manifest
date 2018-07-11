@@ -18,9 +18,9 @@ boost/histogram/axis/axis_base.html
 boost/histogram/axis/axis_base_uoflow.html
 boost/histogram/axis/interval_view.html
 boost/histogram/axis/value_view.html
-boost/histogram/histogram__idm419073048400.html
-boost/histogram/histogram__idm419073048400/lin_visitor.html
-boost/histogram/histogram__idm419073048400/xlin_visitor.html
+boost/histogram/histogram__idm236838731024.html
+boost/histogram/histogram__idm236838731024/lin_visitor.html
+boost/histogram/histogram__idm236838731024/xlin_visitor.html
 boost/histogram/axis/any.html
 boost/histogram/axis/category.html
 boost/histogram/axis/circular.html
@@ -34,8 +34,8 @@ boost/histogram/static_tag.html
 boost/histogram/bin_iterator_over.html
 boost/histogram/axis/iterator_over.html
 boost/histogram/axis/reverse_iterator_over.html
-boost/histogram/histogram__idm419072508384.html
-boost/histogram/histogram__idm419072508384/shape_assign_visitor.html
+boost/histogram/histogram__idm236838191008.html
+boost/histogram/histogram__idm236838191008/shape_assign_visitor.html
 boost/histogram/adaptive_storage.html
 boost/histogram/weight_counter.html
 histogram/changelog.html
