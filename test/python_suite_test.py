@@ -12,7 +12,7 @@ sys.path.append(os.getcwd())
 import unittest
 from math import pi
 from histogram import HAVE_NUMPY, histogram
-from histogram.axis import (regular, regular_log, regular_sqrt, regular_cos,
+from histogram.axis import (regular, regular_log, regular_sqrt,
                             regular_pow, circular, variable, category,
                             integer)
 import pickle
@@ -54,7 +54,6 @@ class test_regular(unittest.TestCase):
         regular(1, 1.0, 2.0, label="ra", uoflow=False)
         regular_log(1, 1.0, 2.0)
         regular_sqrt(1, 1.0, 2.0)
-        regular_cos(1, 0.5, 1.0)
         regular_pow(1, 1.0, 2.0, 1.5)
         with self.assertRaises(TypeError):
             regular()
@@ -62,13 +61,13 @@ class test_regular(unittest.TestCase):
             regular(1)
         with self.assertRaises(TypeError):
             regular(1, 1.0)
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             regular(0, 1.0, 2.0)
         with self.assertRaises(TypeError):
             regular("1", 1.0, 2.0)
         with self.assertRaises(Exception):
             regular(-1, 1.0, 2.0)
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             regular(1, 2.0, 1.0)
         with self.assertRaises(TypeError):
             regular(1, 1.0, 2.0, label=0)
@@ -94,6 +93,7 @@ class test_regular(unittest.TestCase):
                   "regular(4, 1.1, 2.2, uoflow=False)",
                   "regular(4, 1.1, 2.2, label='ra', uoflow=False)",
                   "regular_log(4, 1.1, 2.2)",
+                  "regular_sqrt(3, 1.1, 2.2)",
                   "regular_pow(4, 1.1, 2.2, 0.5)"):
             self.assertEqual(str(eval(s)), s)
 
@@ -133,7 +133,7 @@ class test_regular(unittest.TestCase):
 
     def test_log_transform(self):
         a = regular_log(2, 1e0, 1e2)
-        self.assertEqual(a.index(-1), -1)
+        self.assertEqual(a.index(-1), 2)
         self.assertEqual(a.index(0.99), -1)
         self.assertEqual(a.index(1.0), 0)
         self.assertEqual(a.index(9.99), 0)
@@ -147,7 +147,7 @@ class test_regular(unittest.TestCase):
 
     def test_pow_transform(self):
         a = regular_pow(2, 1.0, 9.0, 0.5)
-        self.assertEqual(a.index(-1), -1)
+        self.assertEqual(a.index(-1), 2)
         self.assertEqual(a.index(0.99), -1)
         self.assertEqual(a.index(1.0), 0)
         self.assertEqual(a.index(3.99), 0)
@@ -240,7 +240,7 @@ class test_variable(unittest.TestCase):
         variable(0, 1, label="va", uoflow=True)
         with self.assertRaises(TypeError):
             variable()
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             variable(1.0)
         with self.assertRaises(TypeError):
             variable("1", 2)
@@ -307,7 +307,7 @@ class test_integer(unittest.TestCase):
             integer(1)
         with self.assertRaises(TypeError):
             integer("1", 2)
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             integer(2, -1)
         with self.assertRaises(TypeError):
             integer(1, 2, 3)
@@ -447,7 +447,7 @@ class test_histogram(unittest.TestCase):
             histogram(regular())
         with self.assertRaises(TypeError):
             histogram([integer(-1, 1)])
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             histogram(integer(-1, 1), unknown_keyword="nh")
 
         h = histogram(integer(-1, 2))
@@ -480,11 +480,11 @@ class test_histogram(unittest.TestCase):
             self.assertEqual(hsum(h).value, {False: 6, True: 8}[uoflow])
             self.assertEqual(h.axis(0).shape, {False: 3, True: 5}[uoflow])
 
-            with self.assertRaises(RuntimeError):
+            with self.assertRaises(ValueError):
                 h.at(0, foo=None)
-            with self.assertRaises(RuntimeError):
+            with self.assertRaises(ValueError):
                 h.at(0, 1)
-            with self.assertRaises(RuntimeError):
+            with self.assertRaises(ValueError):
                 h[0, 1]
 
             for get in (lambda h, arg: h.at(arg),
@@ -625,10 +625,10 @@ class test_histogram(unittest.TestCase):
 
     def test_overflow(self):
         h = histogram(*[regular(1, 0, 1) for i in range(50)])
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             h(*range(50))
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             h.at(*range(50)).value
 
     def test_out_of_range(self):
@@ -901,7 +901,12 @@ class test_histogram(unittest.TestCase):
         with self.assertRaises(ValueError):
             a(numpy.empty(2), 1)
         with self.assertRaises(ValueError):
+            a(numpy.empty(2), numpy.empty(3))
+        with self.assertRaises(ValueError):
             a("abc")
+
+        with self.assertRaises(ValueError):
+            a.at(1, 2)
 
         a = histogram(integer(0, 2, uoflow=False),
                       regular(2, 0, 2, uoflow=False))
@@ -910,9 +915,18 @@ class test_histogram(unittest.TestCase):
         self.assertEqual(a.at(0, 1).value, 1)
         self.assertEqual(a.at(1, 0).value, 1)
         self.assertEqual(a.at(1, 1).value, 0)
+        # we don't support: self.assertEqual(a.at([1, 1]).value, 0)
 
         with self.assertRaises(ValueError):
-            a(ar(1, 2, 3))
+            a(1)
+        with self.assertRaises(ValueError):
+            a([1, 0], [1])
+        with self.assertRaises(ValueError):
+            a.at(1)
+        with self.assertRaises(ValueError):
+            a[1]
+        with self.assertRaises(ValueError):
+            a.at(1, 2, 3)
 
         a = histogram(integer(0, 3, uoflow=False))
         a(ar(0, 0, 1, 2, 1, 0, 2, 2))
@@ -943,13 +957,13 @@ class test_histogram(unittest.TestCase):
         self.assertEqual(a.at(1).value, 8)
         self.assertEqual(a.at(2).value, 6)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             a((1, 2), foo=(1, 1))
         with self.assertRaises(ValueError):
             a((1, 2), weight=(1,))
         with self.assertRaises(ValueError):
             a((1, 2), weight="ab")
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             a((1, 2), weight=(1, 1), foo=1)
         with self.assertRaises(ValueError):
             a((1, 2), weight=([1, 1], [2, 2]))

@@ -7,26 +7,24 @@
 #ifndef _BOOST_HISTOGRAM_DETAIL_CAT_HPP_
 #define _BOOST_HISTOGRAM_DETAIL_CAT_HPP_
 
+#include <boost/config.hpp>
 #include <sstream>
-
-#ifdef _MSC_VER
-#define __attribute__(A) // ignore GCC extension
-#endif
 
 namespace boost {
 namespace histogram {
 namespace detail {
 namespace {
-__attribute__((unused)) void cat_impl(std::ostringstream &) {}
+BOOST_ATTRIBUTE_UNUSED inline void cat_impl(std::ostringstream&) {}
 
 template <typename T, typename... Ts>
-void cat_impl(std::ostringstream &os, const T &t, const Ts&... ts) {
+void cat_impl(std::ostringstream& os, const T& t, const Ts&... ts) {
   os << t;
   cat_impl(os, ts...);
 }
 } // namespace
 
-template <typename... Ts> std::string cat(const Ts &... args) {
+template <typename... Ts>
+std::string cat(const Ts&... args) {
   std::ostringstream os;
   cat_impl(os, args...);
   return os.str();
