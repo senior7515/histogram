@@ -54,76 +54,75 @@
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">iostream</span><span class="special">&gt;</span>
 
 <span class="keyword">int</span> <span class="identifier">main</span><span class="special">(</span><span class="keyword">int</span><span class="special">,</span> <span class="keyword">char</span><span class="special">**)</span> <span class="special">{</span>
-    <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
-    <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">literals</span><span class="special">;</span> <span class="comment">// enables _c suffix</span>
+  <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
+  <span class="keyword">using</span> <span class="keyword">namespace</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">literals</span><span class="special">;</span> <span class="comment">// enables _c suffix</span>
 
-    <span class="comment">/*
-      create a static 1d-histogram with an axis that has 6 equidistant
-      bins on the real line from -1.0 to 2.0, and label it as "x"
-    */</span>
-    <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span>
-      <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">6</span><span class="special">,</span> <span class="special">-</span><span class="number">1.0</span><span class="special">,</span> <span class="number">2.0</span><span class="special">,</span> <span class="string">"x"</span><span class="special">)</span>
-    <span class="special">);</span>
+  <span class="comment">/*
+    create a static 1d-histogram with an axis that has 6 equidistant
+    bins on the real line from -1.0 to 2.0, and label it as "x"
+  */</span>
+  <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_static_histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">6</span><span class="special">,</span> <span class="special">-</span><span class="number">1.0</span><span class="special">,</span> <span class="number">2.0</span><span class="special">,</span> <span class="string">"x"</span><span class="special">));</span>
 
-    <span class="comment">// fill histogram with data, typically this happens in a loop</span>
-    <span class="comment">// STL algorithms are supported</span>
-    <span class="keyword">auto</span> <span class="identifier">data</span> <span class="special">=</span> <span class="special">{</span> <span class="special">-</span><span class="number">0.5</span><span class="special">,</span> <span class="number">1.1</span><span class="special">,</span> <span class="number">0.3</span><span class="special">,</span> <span class="number">1.7</span> <span class="special">};</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span><span class="special">(</span><span class="identifier">data</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">data</span><span class="special">.</span><span class="identifier">end</span><span class="special">(),</span> <span class="identifier">h</span><span class="special">);</span>
+  <span class="comment">// fill histogram with data, typically this happens in a loop</span>
+  <span class="comment">// STL algorithms are supported</span>
+  <span class="keyword">auto</span> <span class="identifier">data</span> <span class="special">=</span> <span class="special">{-</span><span class="number">0.5</span><span class="special">,</span> <span class="number">1.1</span><span class="special">,</span> <span class="number">0.3</span><span class="special">,</span> <span class="number">1.7</span><span class="special">};</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">for_each</span><span class="special">(</span><span class="identifier">data</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">data</span><span class="special">.</span><span class="identifier">end</span><span class="special">(),</span> <span class="identifier">h</span><span class="special">);</span>
 
-    <span class="comment">/*
-      a regular axis is a sequence of semi-open bins; extra under- and
-      overflow bins extend the axis in the default configuration
-      index   :     -1    0    1   2   3   4   5   6
-      bin edge:  -inf -1.0 -0.5 0.0 0.5 1.0 1.5 2.0 inf
-    */</span>
-    <span class="identifier">h</span><span class="special">(-</span><span class="number">1.5</span><span class="special">);</span> <span class="comment">// put in underflow bin -1</span>
-    <span class="identifier">h</span><span class="special">(-</span><span class="number">1.0</span><span class="special">);</span> <span class="comment">// put in bin 0, bin interval is semi-open</span>
-    <span class="identifier">h</span><span class="special">(</span><span class="number">2.0</span><span class="special">);</span>  <span class="comment">// put in overflow bin 6, bin interval is semi-open</span>
-    <span class="identifier">h</span><span class="special">(</span><span class="number">20.0</span><span class="special">);</span> <span class="comment">// put in overflow bin 6</span>
+  <span class="comment">/*
+    a regular axis is a sequence of semi-open bins; extra under- and
+    overflow bins extend the axis in the default configuration
+    index   :     -1    0    1   2   3   4   5   6
+    bin edge:  -inf -1.0 -0.5 0.0 0.5 1.0 1.5 2.0 inf
+  */</span>
+  <span class="identifier">h</span><span class="special">(-</span><span class="number">1.5</span><span class="special">);</span> <span class="comment">// put in underflow bin -1</span>
+  <span class="identifier">h</span><span class="special">(-</span><span class="number">1.0</span><span class="special">);</span> <span class="comment">// put in bin 0, bin interval is semi-open</span>
+  <span class="identifier">h</span><span class="special">(</span><span class="number">2.0</span><span class="special">);</span>  <span class="comment">// put in overflow bin 6, bin interval is semi-open</span>
+  <span class="identifier">h</span><span class="special">(</span><span class="number">20.0</span><span class="special">);</span> <span class="comment">// put in overflow bin 6</span>
 
-    <span class="comment">/*
-      do a weighted fill using bh::weight, a wrapper for any type,
-      which may appear at the beginning of the argument list
-    */</span>
-    <span class="identifier">h</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">1.0</span><span class="special">),</span> <span class="number">0.1</span><span class="special">);</span>
+  <span class="comment">/*
+    do a weighted fill using bh::weight, a wrapper for any type,
+    which may appear at the beginning of the argument list
+  */</span>
+  <span class="identifier">h</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">weight</span><span class="special">(</span><span class="number">1.0</span><span class="special">),</span> <span class="number">0.1</span><span class="special">);</span>
 
-    <span class="comment">/*
-      iterate over bins with a fancy histogram iterator
-      - order in which bins are iterated over is an implementation detail
-      - iterator dereferences to histogram::element_type, which is defined by
-        its storage class; by default something with value() and
-        variance() methods; the first returns the
-        actual count, the second returns a variance estimate of the count
-        (see Rationale section for what this means)
-      - idx(N) method returns the index of the N-th axis
-      - bin(N_c) method returns current bin of N-th axis; the suffx _c turns
-        the argument into a compile-time number, which is needed to return
-        different `bin_type`s for different axes
-      - `bin_type` usually is a semi-open interval representing the bin, whose
-        edges can be accessed with methods `lower()` and `upper()`, but the
-        implementation depends on the axis, please look it up in the reference
-    */</span>
-    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">it</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">begin</span><span class="special">();</span> <span class="identifier">it</span> <span class="special">!=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">end</span><span class="special">();</span> <span class="special">++</span><span class="identifier">it</span><span class="special">)</span> <span class="special">{</span>
-      <span class="keyword">const</span> <span class="keyword">auto</span> <span class="identifier">bin</span> <span class="special">=</span> <span class="identifier">it</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">);</span>
-      <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"bin "</span> <span class="special">&lt;&lt;</span> <span class="identifier">it</span><span class="special">.</span><span class="identifier">idx</span><span class="special">(</span><span class="number">0</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">" x in ["</span>
-                <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">lower</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">upper</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"): "</span>
-                <span class="special">&lt;&lt;</span> <span class="identifier">it</span><span class="special">-&gt;</span><span class="identifier">value</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">" +/- "</span>
-                <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">sqrt</span><span class="special">(</span><span class="identifier">it</span><span class="special">-&gt;</span><span class="identifier">variance</span><span class="special">())</span>
-                <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
-    <span class="special">}</span>
+  <span class="comment">/*
+    iterate over bins with a fancy histogram iterator
+    - order in which bins are iterated over is an implementation detail
+    - iterator dereferences to histogram::element_type, which is defined by
+      its storage class; by default something with value() and
+      variance() methods; the first returns the
+      actual count, the second returns a variance estimate of the count
+      (see Rationale section for what this means)
+    - idx(N) method returns the index of the N-th axis
+    - bin(N_c) method returns current bin of N-th axis; the suffx _c turns
+      the argument into a compile-time number, which is needed to return
+      different `bin_type`s for different axes
+    - `bin_type` usually is a semi-open interval representing the bin, whose
+      edges can be accessed with methods `lower()` and `upper()`, but the
+      implementation depends on the axis, please look it up in the reference
+  */</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span><span class="special">.</span><span class="identifier">setf</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">ios_base</span><span class="special">::</span><span class="identifier">fixed</span><span class="special">);</span>
+  <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">it</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">begin</span><span class="special">();</span> <span class="identifier">it</span> <span class="special">!=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">end</span><span class="special">();</span> <span class="special">++</span><span class="identifier">it</span><span class="special">)</span> <span class="special">{</span>
+    <span class="keyword">const</span> <span class="keyword">auto</span> <span class="identifier">bin</span> <span class="special">=</span> <span class="identifier">it</span><span class="special">.</span><span class="identifier">bin</span><span class="special">(</span><span class="number">0</span><span class="identifier">_c</span><span class="special">);</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">cout</span> <span class="special">&lt;&lt;</span> <span class="string">"bin "</span> <span class="special">&lt;&lt;</span> <span class="identifier">it</span><span class="special">.</span><span class="identifier">idx</span><span class="special">(</span><span class="number">0</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="string">" x in ["</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">setprecision</span><span class="special">(</span><span class="number">1</span><span class="special">)</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">setw</span><span class="special">(</span><span class="number">4</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">lower</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">", "</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">setw</span><span class="special">(</span><span class="number">4</span><span class="special">)</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">bin</span><span class="special">.</span><span class="identifier">upper</span><span class="special">()</span> <span class="special">&lt;&lt;</span> <span class="string">"): "</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">setprecision</span><span class="special">(</span><span class="number">1</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">it</span><span class="special">-&gt;</span><span class="identifier">value</span><span class="special">()</span>
+              <span class="special">&lt;&lt;</span> <span class="string">" +/- "</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">setprecision</span><span class="special">(</span><span class="number">3</span><span class="special">)</span> <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">sqrt</span><span class="special">(</span><span class="identifier">it</span><span class="special">-&gt;</span><span class="identifier">variance</span><span class="special">())</span>
+              <span class="special">&lt;&lt;</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">endl</span><span class="special">;</span>
+  <span class="special">}</span>
 
-    <span class="comment">/* program output: (note that under- and overflow bins appear at the end)
+  <span class="comment">/* program output: (note that under- and overflow bins appear at the end)
 
-    bin 0 x in [-1.0, -0.5): 1 +/- 1
-    bin 1 x in [-0.5,  0.0): 0 +/- 0
-    bin 2 x in [ 0.0,  0.5): 1 +/- 1
-    bin 3 x in [ 0.5,  1.0): 0 +/- 0
-    bin 4 x in [ 1.0,  1.5): 1 +/- 1
-    bin 5 x in [ 1.5,  2.0): 0 +/- 0
-    bin 6 x in [ 2.0, inf): 2 +/- 1.41421
-    bin -1 x in [-inf, -1): 1 +/- 1
+  bin 0 x in [-1.0, -0.5): 1 +/- 1
+  bin 1 x in [-0.5,  0.0): 0 +/- 0
+  bin 2 x in [ 0.0,  0.5): 1 +/- 1
+  bin 3 x in [ 0.5,  1.0): 0 +/- 0
+  bin 4 x in [ 1.0,  1.5): 0 +/- 0
+  bin 5 x in [ 1.5,  2.0): 0 +/- 0
+  bin 6 x in [ 2.0, inf): 2 +/- 1.41421
+  bin -1 x in [-inf, -1): 1 +/- 1
 
-    */</span>
+  */</span>
 <span class="special">}</span>
 </pre>
 </div>
@@ -148,42 +147,42 @@
 <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
 
 <span class="keyword">int</span> <span class="identifier">main</span><span class="special">()</span> <span class="special">{</span>
-    <span class="comment">/*
-        create a dynamic histogram with the factory `make_dynamic_histogram`
-        - axis can be passed directly just like for `make_static_histogram`
-        - in addition, the factory also accepts iterators over a sequence of
-          axis::any, the polymorphic type that can hold concrete axis types
-    */</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">any</span><span class="special">&lt;&gt;&gt;</span> <span class="identifier">axes</span><span class="special">;</span>
-    <span class="identifier">axes</span><span class="special">.</span><span class="identifier">emplace_back</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">category</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&gt;({</span><span class="string">"red"</span><span class="special">,</span> <span class="string">"blue"</span><span class="special">}));</span>
-    <span class="identifier">axes</span><span class="special">.</span><span class="identifier">emplace_back</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">5</span><span class="special">,</span> <span class="special">-</span><span class="number">5</span><span class="special">,</span> <span class="number">5</span><span class="special">,</span> <span class="string">"x"</span><span class="special">));</span>
-    <span class="identifier">axes</span><span class="special">.</span><span class="identifier">emplace_back</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">5</span><span class="special">,</span> <span class="special">-</span><span class="number">5</span><span class="special">,</span> <span class="number">5</span><span class="special">,</span> <span class="string">"y"</span><span class="special">));</span>
-    <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_dynamic_histogram</span><span class="special">(</span><span class="identifier">axes</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">axes</span><span class="special">.</span><span class="identifier">end</span><span class="special">());</span>
+  <span class="comment">/*
+      create a dynamic histogram with the factory `make_dynamic_histogram`
+      - axis can be passed directly just like for `make_static_histogram`
+      - in addition, the factory also accepts iterators over a sequence of
+        axis::any, the polymorphic type that can hold concrete axis types
+  */</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">any_std</span><span class="special">&gt;</span> <span class="identifier">axes</span><span class="special">;</span>
+  <span class="identifier">axes</span><span class="special">.</span><span class="identifier">emplace_back</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">category</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&gt;({</span><span class="string">"red"</span><span class="special">,</span> <span class="string">"blue"</span><span class="special">}));</span>
+  <span class="identifier">axes</span><span class="special">.</span><span class="identifier">emplace_back</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">5</span><span class="special">,</span> <span class="special">-</span><span class="number">5</span><span class="special">,</span> <span class="number">5</span><span class="special">,</span> <span class="string">"x"</span><span class="special">));</span>
+  <span class="identifier">axes</span><span class="special">.</span><span class="identifier">emplace_back</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">regular</span><span class="special">&lt;&gt;(</span><span class="number">5</span><span class="special">,</span> <span class="special">-</span><span class="number">5</span><span class="special">,</span> <span class="number">5</span><span class="special">,</span> <span class="string">"y"</span><span class="special">));</span>
+  <span class="keyword">auto</span> <span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">make_dynamic_histogram</span><span class="special">(</span><span class="identifier">axes</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">axes</span><span class="special">.</span><span class="identifier">end</span><span class="special">());</span>
 
-    <span class="comment">// fill histogram with random numbers</span>
-    <span class="identifier">br</span><span class="special">::</span><span class="identifier">mt19937</span> <span class="identifier">gen</span><span class="special">;</span>
-    <span class="identifier">br</span><span class="special">::</span><span class="identifier">normal_distribution</span><span class="special">&lt;&gt;</span> <span class="identifier">norm</span><span class="special">;</span>
-    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="number">1000</span><span class="special">;</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span>
-        <span class="identifier">h</span><span class="special">(</span><span class="identifier">i</span> <span class="special">%</span> <span class="number">2</span> <span class="special">?</span> <span class="string">"red"</span> <span class="special">:</span> <span class="string">"blue"</span><span class="special">,</span> <span class="identifier">norm</span><span class="special">(</span><span class="identifier">gen</span><span class="special">),</span> <span class="identifier">norm</span><span class="special">(</span><span class="identifier">gen</span><span class="special">));</span>
+  <span class="comment">// fill histogram with random numbers</span>
+  <span class="identifier">br</span><span class="special">::</span><span class="identifier">mt19937</span> <span class="identifier">gen</span><span class="special">;</span>
+  <span class="identifier">br</span><span class="special">::</span><span class="identifier">normal_distribution</span><span class="special">&lt;&gt;</span> <span class="identifier">norm</span><span class="special">;</span>
+  <span class="keyword">for</span> <span class="special">(</span><span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="number">1000</span><span class="special">;</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span>
+    <span class="identifier">h</span><span class="special">(</span><span class="identifier">i</span> <span class="special">%</span> <span class="number">2</span> <span class="special">?</span> <span class="string">"red"</span> <span class="special">:</span> <span class="string">"blue"</span><span class="special">,</span> <span class="identifier">norm</span><span class="special">(</span><span class="identifier">gen</span><span class="special">),</span> <span class="identifier">norm</span><span class="special">(</span><span class="identifier">gen</span><span class="special">));</span>
 
-    <span class="comment">/*
-        print dynamic histogram by iterating over bins
-        - for most axis types, the for loop looks just like for a static
-          histogram, except that we can pass runtime numbers, too
-        - if the [bin type] of the axis is not convertible to a
-          double interval, one needs to cast axis::any before looping;
-          this is here the case for the category axis
-    */</span>
-    <span class="keyword">using</span> <span class="identifier">cas</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">category</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&gt;;</span>
-    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">cbin</span> <span class="special">:</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">cast</span><span class="special">&lt;</span><span class="identifier">cas</span><span class="special">&gt;(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)))</span> <span class="special">{</span>
-        <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"%s\n"</span><span class="special">,</span> <span class="identifier">cbin</span><span class="special">.</span><span class="identifier">value</span><span class="special">().</span><span class="identifier">c_str</span><span class="special">());</span>
-        <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">ybin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">2</span><span class="special">))</span> <span class="special">{</span> <span class="comment">// rows</span>
-            <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">xbin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">))</span> <span class="special">{</span> <span class="comment">// columns</span>
-                <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"%3.0f "</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">cbin</span><span class="special">,</span> <span class="identifier">xbin</span><span class="special">,</span> <span class="identifier">ybin</span><span class="special">).</span><span class="identifier">value</span><span class="special">());</span>
-            <span class="special">}</span>
-            <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"\n"</span><span class="special">);</span>
-        <span class="special">}</span>
+  <span class="comment">/*
+      print dynamic histogram by iterating over bins
+      - for most axis types, the for loop looks just like for a static
+        histogram, except that we can pass runtime numbers, too
+      - if the [bin type] of the axis is not convertible to a
+        double interval, one needs to cast axis::any before looping;
+        this is here the case for the category axis
+  */</span>
+  <span class="keyword">using</span> <span class="identifier">cas</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">category</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&gt;;</span>
+  <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">cbin</span> <span class="special">:</span> <span class="keyword">static_cast</span><span class="special">&lt;</span><span class="keyword">const</span> <span class="identifier">cas</span><span class="special">&amp;&gt;(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)))</span> <span class="special">{</span>
+    <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"%s\n"</span><span class="special">,</span> <span class="identifier">cbin</span><span class="special">.</span><span class="identifier">value</span><span class="special">().</span><span class="identifier">c_str</span><span class="special">());</span>
+    <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">ybin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">2</span><span class="special">))</span> <span class="special">{</span>   <span class="comment">// rows</span>
+      <span class="keyword">for</span> <span class="special">(</span><span class="keyword">auto</span> <span class="identifier">xbin</span> <span class="special">:</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">))</span> <span class="special">{</span> <span class="comment">// columns</span>
+        <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"%3.0f "</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">cbin</span><span class="special">,</span> <span class="identifier">xbin</span><span class="special">,</span> <span class="identifier">ybin</span><span class="special">).</span><span class="identifier">value</span><span class="special">());</span>
+      <span class="special">}</span>
+      <span class="identifier">std</span><span class="special">::</span><span class="identifier">printf</span><span class="special">(</span><span class="string">"\n"</span><span class="special">);</span>
     <span class="special">}</span>
+  <span class="special">}</span>
 <span class="special">}</span>
 </pre>
 <div class="note"><table border="0" summary="Note">
@@ -242,7 +241,7 @@
     <span class="identifier">plt</span><span class="special">.</span><span class="identifier">savefig</span><span class="special">(</span><span class="string">"example_2d_python.png"</span><span class="special">)</span>
 <span class="keyword">except</span> <span class="identifier">ImportError</span><span class="special">:</span>
     <span class="comment"># ok, no matplotlib, then just print the full count matrix</span>
-    <span class="keyword">print</span> <span class="identifier">count_matrix</span>
+    <span class="keyword">print</span><span class="special">(</span><span class="identifier">count_matrix</span><span class="special">)</span>
 
     <span class="comment"># output of the print looks something like this, the two right-most rows</span>
     <span class="comment"># and two down-most columns represent under-/overflow bins</span>
