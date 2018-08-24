@@ -47,8 +47,8 @@
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-            derive publically from <code class="computeroutput">boost::histogram::axis::axis_base</code>
-            or <code class="computeroutput">boost::histogram::axis::axis_base_uoflow</code>
+            derive publically from <code class="computeroutput"><a class="link" href="../boost/histogram/axis/labeled_base.html" title="Class template labeled_base">boost::histogram::axis::labeled_base</a></code>
+            and <code class="computeroutput"><a class="link" href="../boost/histogram/axis/iterator_mixin.html" title="Class template iterator_mixin">boost::histogram::axis::iterator_mixin</a></code>
           </li>
 <li class="listitem">
             be default/copy/move constructable
@@ -135,6 +135,9 @@
           </li>
 <li class="listitem">
             be equal comparable
+          </li>
+<li class="listitem">
+            have a nested type <code class="computeroutput"><span class="identifier">allocator_type</span></code>
           </li>
 <li class="listitem">
             have a nested type <code class="computeroutput"><span class="identifier">element_type</span></code>,
