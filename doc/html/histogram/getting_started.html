@@ -31,10 +31,6 @@
       and use a static 1d-histogram in C++</a></span></dt>
 <dt><span class="section"><a href="getting_started.html#histogram.getting_started.make_and_use_a_dynamic_3d_histog">Make
       and use a dynamic 3d-histogram in C++</a></span></dt>
-<dt><span class="section"><a href="getting_started.html#histogram.getting_started.make_and_use_a_2d_histogram_in_p">Make
-      and use a 2d-histogram in Python</a></span></dt>
-<dt><span class="section"><a href="getting_started.html#histogram.getting_started.make_and_use_a_1d_histogram_in_p">Make
-      and use a 1d-histogram in Python without Numpy</a></span></dt>
 </dl></div>
 <p>
       To get you started quickly, here are some heavily commented examples to copy
@@ -196,92 +192,6 @@
           <span class="special">{</span> <span class="identifier">red</span><span class="special">,</span> <span class="identifier">blue</span> <span class="special">};</span></code> and a <code class="computeroutput"><span class="identifier">axis</span><span class="special">::</span><span class="identifier">category</span><span class="special">&lt;&gt;</span></code> axis.
         </p></td></tr>
 </table></div>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="histogram.getting_started.make_and_use_a_2d_histogram_in_p"></a><a class="link" href="getting_started.html#histogram.getting_started.make_and_use_a_2d_histogram_in_p" title="Make and use a 2d-histogram in Python">Make
-      and use a 2d-histogram in Python</a>
-</h3></div></div></div>
-<p>
-        You need to build the library with Numpy support to run this example.
-      </p>
-<pre class="programlisting"><span class="keyword">import</span> <span class="identifier">histogram</span> <span class="keyword">as</span> <span class="identifier">hg</span>
-<span class="keyword">import</span> <span class="identifier">numpy</span> <span class="keyword">as</span> <span class="identifier">np</span>
-
-<span class="comment"># create 2d-histogram with two axes with 10 equidistant bins from -3 to 3</span>
-<span class="identifier">h</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">10</span><span class="special">,</span> <span class="special">-</span><span class="number">3</span><span class="special">,</span> <span class="number">3</span><span class="special">,</span> <span class="string">"x"</span><span class="special">),</span>
-                 <span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">10</span><span class="special">,</span> <span class="special">-</span><span class="number">3</span><span class="special">,</span> <span class="number">3</span><span class="special">,</span> <span class="string">"y"</span><span class="special">))</span>
-
-<span class="comment"># generate some numpy arrays with data to fill into histogram,</span>
-<span class="comment"># in this case normal distributed random numbers in x and y</span>
-<span class="identifier">x</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">random</span><span class="special">.</span><span class="identifier">randn</span><span class="special">(</span><span class="number">1000</span><span class="special">)</span>
-<span class="identifier">y</span> <span class="special">=</span> <span class="number">0.5</span> <span class="special">*</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">random</span><span class="special">.</span><span class="identifier">randn</span><span class="special">(</span><span class="number">1000</span><span class="special">)</span>
-
-<span class="comment"># fill histogram with numpy arrays, this is very fast</span>
-<span class="identifier">h</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">)</span>
-
-<span class="comment"># get representations of the bin edges as Numpy arrays, this representation</span>
-<span class="comment"># differs from `list(h.axis(0))`, because it is optimised for compatibility</span>
-<span class="comment"># with existing Numpy code, i.e. to replace numpy.histogram</span>
-<span class="identifier">x</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">array</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">))</span>
-<span class="identifier">y</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">array</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">))</span>
-
-<span class="comment"># creates a view of the counts (no copy involved)</span>
-<span class="identifier">count_matrix</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">asarray</span><span class="special">(</span><span class="identifier">h</span><span class="special">)</span>
-
-<span class="comment"># cut off the under- and overflow bins to not confuse matplotib (no copy)</span>
-<span class="identifier">reduced_count_matrix</span> <span class="special">=</span> <span class="identifier">count_matrix</span><span class="special">[:-</span><span class="number">2</span><span class="special">,:-</span><span class="number">2</span><span class="special">]</span>
-
-<span class="keyword">try</span><span class="special">:</span>
-    <span class="comment"># draw the count matrix</span>
-    <span class="keyword">import</span> <span class="identifier">matplotlib</span><span class="special">.</span><span class="identifier">pyplot</span> <span class="keyword">as</span> <span class="identifier">plt</span>
-    <span class="identifier">plt</span><span class="special">.</span><span class="identifier">pcolor</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">reduced_count_matrix</span><span class="special">.</span><span class="identifier">T</span><span class="special">)</span>
-    <span class="identifier">plt</span><span class="special">.</span><span class="identifier">xlabel</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">label</span><span class="special">)</span>
-    <span class="identifier">plt</span><span class="special">.</span><span class="identifier">ylabel</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">label</span><span class="special">)</span>
-    <span class="identifier">plt</span><span class="special">.</span><span class="identifier">savefig</span><span class="special">(</span><span class="string">"example_2d_python.png"</span><span class="special">)</span>
-<span class="keyword">except</span> <span class="identifier">ImportError</span><span class="special">:</span>
-    <span class="comment"># ok, no matplotlib, then just print the full count matrix</span>
-    <span class="keyword">print</span><span class="special">(</span><span class="identifier">count_matrix</span><span class="special">)</span>
-
-    <span class="comment"># output of the print looks something like this, the two right-most rows</span>
-    <span class="comment"># and two down-most columns represent under-/overflow bins</span>
-    <span class="comment"># [[ 0  0  0  1  5  0  0  1  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  1 17 11  6  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  5 31 26  4  1  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  3 20 59 62 26  4  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  1 26 96 89 16  1  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  4 21 86 84 20  1  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  1 24 71 50 15  2  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  6 26 37  7  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  0 11 10  2  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  1  2  3  1  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  0  0  2  0  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  0  0  1  0  0  0  0  0  0]]</span>
-</pre>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="histogram.getting_started.make_and_use_a_1d_histogram_in_p"></a><a class="link" href="getting_started.html#histogram.getting_started.make_and_use_a_1d_histogram_in_p" title="Make and use a 1d-histogram in Python without Numpy">Make
-      and use a 1d-histogram in Python without Numpy</a>
-</h3></div></div></div>
-<p>
-        Building the library with Numpy support is highly recommended, but here is
-        an example on how to use the library without Numpy support for completeness.
-      </p>
-<pre class="programlisting"><span class="keyword">import</span> <span class="identifier">histogram</span> <span class="keyword">as</span> <span class="identifier">hg</span>
-
-<span class="comment"># make 1-d histogram with 5 logarithmic bins from 1e0 to 1e5</span>
-<span class="identifier">h</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular_log</span><span class="special">(</span><span class="number">5</span><span class="special">,</span> <span class="number">1e0</span><span class="special">,</span> <span class="number">1e5</span><span class="special">,</span> <span class="string">"x"</span><span class="special">))</span>
-
-<span class="comment"># fill histogram with numbers</span>
-<span class="keyword">for</span> <span class="identifier">x</span> <span class="keyword">in</span> <span class="special">(</span><span class="number">2e0</span><span class="special">,</span> <span class="number">2e1</span><span class="special">,</span> <span class="number">2e2</span><span class="special">,</span> <span class="number">2e3</span><span class="special">,</span> <span class="number">2e4</span><span class="special">):</span>
-    <span class="identifier">h</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">weight</span><span class="special">=</span><span class="number">2</span><span class="special">)</span>
-
-<span class="comment"># iterate over bins and access bin counter</span>
-<span class="keyword">for</span> <span class="identifier">idx</span><span class="special">,</span> <span class="special">(</span><span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">)</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)):</span>
-    <span class="keyword">print</span><span class="special">(</span><span class="string">"bin {0} x in [{1}, {2}): {3} +/- {4}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span>
-          <span class="identifier">idx</span><span class="special">,</span> <span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">variance</span> <span class="special">**</span> <span class="number">0.5</span><span class="special">))</span>
-</pre>
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>

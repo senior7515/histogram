@@ -137,49 +137,60 @@
             be equal comparable
           </li>
 <li class="listitem">
-            have a nested type <code class="computeroutput"><span class="identifier">allocator_type</span></code>
-          </li>
+            have nested types
+            <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
 <li class="listitem">
-            have a nested type <code class="computeroutput"><span class="identifier">element_type</span></code>,
-            which represent the bin count
-          </li>
+                  <code class="computeroutput"><span class="identifier">allocator_type</span></code>
+                </li>
 <li class="listitem">
-            have a nested type <code class="computeroutput"><span class="identifier">const_reference</span></code>,
-            its const reference version
-          </li>
+                  <code class="computeroutput"><span class="identifier">element_type</span></code>, which
+                  represent the bin count
+                </li>
 <li class="listitem">
-            have a constructor <code class="computeroutput"><span class="identifier">storage_type</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span>
-            <span class="identifier">n</span><span class="special">)</span></code>,
-            which prepares the storage of <code class="computeroutput"><span class="identifier">n</span></code>
-            bins.
+                  <code class="computeroutput"><span class="identifier">const_reference</span></code>,
+                  const reference of bin count
+                </li>
+<li class="listitem">
+                  <code class="computeroutput"><span class="identifier">scale_type</span></code>, type
+                  to scale the storage counters
+                </li>
+</ul></div>
           </li>
 <li class="listitem">
             have the following methods and operators:
             <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; ">
 <li class="listitem">
+                  <code class="computeroutput"><span class="keyword">void</span> <span class="identifier">reset</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span>
+                  <span class="identifier">n</span><span class="special">)</span></code>
+                  which prepares n counters initialized to zero
+                </li>
+<li class="listitem">
                   <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">size</span><span class="special">()</span> <span class="keyword">const</span></code>
+                  get number of counters
                 </li>
 <li class="listitem">
                   <code class="computeroutput"><span class="keyword">void</span> <span class="identifier">increase</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span>
                   <span class="identifier">index</span><span class="special">)</span></code>
+                  increment bin counter
                 </li>
 <li class="listitem">
                   <code class="computeroutput"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span> <span class="keyword">void</span>
                   <span class="identifier">add</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">index</span><span class="special">,</span> <span class="keyword">const</span>
                   <span class="identifier">T</span><span class="special">&amp;</span>
                   <span class="identifier">x</span><span class="special">)</span></code>
+                  add value to bin counter
                 </li>
 <li class="listitem">
                   <code class="computeroutput"><span class="identifier">const_reference</span> <span class="keyword">operator</span><span class="special">[](</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">index</span><span class="special">)</span> <span class="keyword">const</span></code>
+                  read bin counter
                 </li>
 <li class="listitem">
                   <code class="computeroutput"><span class="identifier">storage_type</span><span class="special">&amp;</span>
-                  <span class="keyword">operator</span><span class="special">+=(</span><span class="keyword">const</span> <span class="identifier">storage_type</span><span class="special">&amp;</span> <span class="identifier">other</span><span class="special">)</span></code>
+                  <span class="keyword">operator</span><span class="special">+=(</span><span class="keyword">const</span> <span class="identifier">storage_type</span><span class="special">&amp;</span> <span class="identifier">other</span><span class="special">)</span></code> add another storage
                 </li>
 <li class="listitem">
                   <code class="computeroutput"><span class="identifier">storage_type</span><span class="special">&amp;</span>
-                  <span class="keyword">operator</span><span class="special">*=(</span><span class="keyword">const</span> <span class="identifier">value_type</span>
-                  <span class="identifier">x</span><span class="special">)</span></code>
+                  <span class="keyword">operator</span><span class="special">*=(</span><span class="keyword">const</span> <span class="identifier">scale_type</span><span class="special">&amp;</span> <span class="identifier">x</span><span class="special">)</span></code> multiply by scale type
                 </li>
 </ul></div>
           </li>
@@ -188,13 +199,13 @@
             <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: circle; "><li class="listitem">
                   <code class="computeroutput"><span class="keyword">template</span> <span class="special">&lt;</span><span class="keyword">typename</span> <span class="identifier">T</span><span class="special">&gt;</span> <span class="keyword">void</span>
                   <span class="identifier">add</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">size_t</span> <span class="identifier">index</span><span class="special">,</span> <span class="keyword">const</span>
-                  <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">detail</span><span class="special">::</span><span class="identifier">weight_t</span><span class="special">&lt;</span><span class="identifier">T</span><span class="special">&gt;&amp;</span>
+                  <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">detail</span><span class="special">::</span><span class="identifier">weight_type</span><span class="special">&lt;</span><span class="identifier">T</span><span class="special">&gt;&amp;</span>
                   <span class="identifier">w</span><span class="special">)</span></code>
                 </li></ul></div>
           </li>
 </ul></div>
 <p>
-        <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">boost::histogram::array_storage</a></code>
+        <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">boost::histogram::array_storage</a></code>
         is a simple storage type which may serve as a template for creating a new
         storage type.
       </p>

@@ -32,7 +32,7 @@
       is used.
     </p>
 <p>
-      The following plot shows results of a benchmark on a 9 GHz Macbook Pro. Random
+      The following plot shows results of a benchmark on a 2.9 GHz Macbook Pro. Random
       numbers from a uniform and a normal distribution are filled into histograms
       with 1, 3, and 6 axes. 100 bins are used in the first case, 100x100x100=10^6
       in the second, and 10x10x10x10x10x10=10^6 in the third. Each test is repeated
@@ -54,31 +54,25 @@
             numpy functions (<code class="computeroutput"><span class="identifier">numpy</span><span class="special">.</span><span class="identifier">histogram</span></code>
             for 1D, <code class="computeroutput"><span class="identifier">numpy</span><span class="special">.</span><span class="identifier">histogramdd</span></code> for 2D, 3D, and 6D)
           </p></dd>
-<dt><span class="term">py:hd_sd</span></dt>
-<dd><p>
-            <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm451337782576">dynamic
-            histogram</a></code> with <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">boost::histogram::adaptive_storage</a></code>,
-            called from Python
-          </p></dd>
 <dt><span class="term">hs_ss</span></dt>
 <dd><p>
             <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">static histogram</a></code>
-            with <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">boost::histogram::array_storage&lt;int&gt;</a></code>
+            with <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">boost::histogram::array_storage&lt;int&gt;</a></code>
           </p></dd>
 <dt><span class="term">hs_sd</span></dt>
 <dd><p>
             <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">static histogram</a></code>
-            with <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">boost::histogram::adaptive_storage</a></code>
+            with <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">boost::histogram::adaptive_storage</a></code>
           </p></dd>
 <dt><span class="term">hd_ss</span></dt>
 <dd><p>
-            <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm451337782576">dynamic
-            histogram</a></code> with <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">boost::histogram::array_storage&lt;int&gt;</a></code>
+            <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm499186002256">dynamic
+            histogram</a></code> with <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">boost::histogram::array_storage&lt;int&gt;</a></code>
           </p></dd>
 <dt><span class="term">hd_sd</span></dt>
 <dd><p>
-            <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm451337782576">dynamic
-            histogram</a></code> with <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">boost::histogram::adaptive_storage</a></code>
+            <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm499186002256">dynamic
+            histogram</a></code> with <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">boost::histogram::adaptive_storage</a></code>
           </p></dd>
 </dl>
 </div>
@@ -86,8 +80,8 @@
       A <code class="computeroutput">static histogram</code>
       is always faster than <code class="computeroutput">dynamic
       histogram</code> and safer to use, as more checks are done at compile
-      time. It is recommended when working in C++ only. <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">boost::histogram::adaptive_storage</a></code>
-      is faster than <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">boost::histogram::array_storage</a></code>
+      time. <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">boost::histogram::adaptive_storage</a></code>
+      is faster than <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">boost::histogram::array_storage</a></code>
       for histograms with many bins, because it uses the cache more effectively due
       to its smaller memory consumption per bin. If the number of bins is small,
       it is slower because of overhead of handling memory in a dynamic way.
@@ -95,9 +89,7 @@
 <p>
       The histograms in this library are mostly faster than the competition, in some
       cases by a factor of 2. Simultaneously they are more flexible, since binning
-      strategies can be customised. The Python-wrapped histogram is slower than numpy's
-      own specialized function for 1D, but beats numpy's multi-dimensional histogramming
-      function by a factor 2 to 3.
+      strategies and the counter management can be customised.
     </p>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>

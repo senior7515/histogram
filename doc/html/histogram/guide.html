@@ -28,8 +28,13 @@
 </h2></div></div></div>
 <div class="toc"><dl class="toc">
 <dt><span class="section"><a href="guide.html#histogram.guide.introduction">Introduction</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp">C++ usage</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.python">Python usage</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.create_a_histogram">Create a histogram</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.fill_histogram">Fill histogram</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.access_bin_counts">Access bin counts</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.arithmetic_operators">Arithmetic operators</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.reductions">Reductions</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.streaming">Streaming</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.serialization">Serialization</a></span></dt>
 <dt><span class="section"><a href="guide.html#histogram.guide.expert">Advanced usage</a></span></dt>
 </dl></div>
 <p>
@@ -84,64 +89,49 @@
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="histogram.guide.cpp"></a><a class="link" href="guide.html#histogram.guide.cpp" title="C++ usage">C++ usage</a>
+<a name="histogram.guide.create_a_histogram"></a><a class="link" href="guide.html#histogram.guide.create_a_histogram" title="Create a histogram">Create a histogram</a>
 </h3></div></div></div>
 <div class="toc"><dl class="toc">
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.create_a_histogram">Create a histogram</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.fill_histogram">Fill histogram</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.access_bin_counts">Access bin counts</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.arithmetic_operators">Arithmetic
-        operators</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.reductions">Reductions</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.streaming">Streaming</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.serialization">Serialization</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.create_a_histogram.static_or_dynamic_histogram">Static
+        or dynamic histogram</a></span></dt>
+<dt><span class="section"><a href="guide.html#histogram.guide.create_a_histogram.axis_configuration">Axis
+        configuration</a></span></dt>
 </dl></div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.cpp.create_a_histogram"></a><a class="link" href="guide.html#histogram.guide.cpp.create_a_histogram" title="Create a histogram">Create a histogram</a>
+<a name="histogram.guide.create_a_histogram.static_or_dynamic_histogram"></a><a class="link" href="guide.html#histogram.guide.create_a_histogram.static_or_dynamic_histogram" title="Static or dynamic histogram">Static
+        or dynamic histogram</a>
 </h4></div></div></div>
-<div class="toc"><dl class="toc">
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.create_a_histogram.static_or_dynamic_histogram">Static
-          or dynamic histogram</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.cpp.create_a_histogram.axis_configuration">Axis
-          configuration</a></span></dt>
-</dl></div>
-<div class="section">
-<div class="titlepage"><div><div><h5 class="title">
-<a name="histogram.guide.cpp.create_a_histogram.static_or_dynamic_histogram"></a><a class="link" href="guide.html#histogram.guide.cpp.create_a_histogram.static_or_dynamic_histogram" title="Static or dynamic histogram">Static
-          or dynamic histogram</a>
-</h5></div></div></div>
 <p>
-            The histogram host class can store axis objects in a static or dynamic
-            container, see the <a class="link" href="rationale.html#histogram.rationale.histogram_host" title="Histogram host class">rationale</a>
-            for details. Use the factory functions <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>
-            and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm451337782576">make_dynamic_histogram</a></code>
-            to make the corresponding histograms. Using static histograms is recommended,
-            because they are faster and usage errors are caught at compile-time.
-            Use dynamic histogram, if:
-          </p>
+          The histogram host class can store axis objects in a static or dynamic
+          container, see the <a class="link" href="rationale.html#histogram.rationale.histogram_host" title="Histogram host class">rationale</a>
+          for details. Use the factory functions <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>
+          and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm499186002256">make_dynamic_histogram</a></code>
+          to make the corresponding histograms. Using static histograms is recommended,
+          because they are faster and usage errors are caught at compile-time. Use
+          dynamic histogram, if:
+        </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-                You only know the axis configurations at runtime, not at compile-time.
-              </li>
+              You only know the axis configurations at runtime, not at compile-time.
+            </li>
 <li class="listitem">
-                You want to write C++ code that interoperates with the Python module
-                included in the library.
-              </li>
+              You want to use a single type in your C++ code that operates on histograms
+              and avoid templated functions.
+            </li>
 </ul></div>
 <p>
-            These factory functions create histograms with the default storage type
-            <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">boost::histogram::adaptive_storage</a></code>,
-            which provides safe counting, is fast and memory efficient. If you think
-            you need another storage type or if you want to create your own, have
-            a look at the section <a class="link" href="guide.html#histogram.guide.expert" title="Advanced usage">Advanced
-            Usage</a>.
-          </p>
+          These factory functions create histograms with the default storage type
+          <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">boost::histogram::adaptive_storage</a></code>,
+          which provides safe counting, is fast and memory efficient. If you think
+          you need another storage type or if you want to create your own, have a
+          look at the section <a class="link" href="guide.html#histogram.guide.expert" title="Advanced usage">Advanced Usage</a>.
+        </p>
 <p>
-            Here is an example on how to use <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>.
-            You pass one or several axis instances, which define the layout of the
-            histogram.
-          </p>
+          Here is an example on how to use <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>.
+          You pass one or several axis instances, which define the layout of the
+          histogram.
+        </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 
 <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
@@ -158,15 +148,15 @@
 <span class="special">}</span>
 </pre>
 <p>
-            An axis object defines how input values are mapped to bins, which means
-            that it defines the number of bins along that axis and a mapping function
-            from input values to bins. If you provide one axis, the histogram is
-            one-dimensional. If you provide two, it is two-dimensional, and so on.
-          </p>
+          An axis object defines how input values are mapped to bins, which means
+          that it defines the number of bins along that axis and a mapping function
+          from input values to bins. If you provide one axis, the histogram is one-dimensional.
+          If you provide two, it is two-dimensional, and so on.
+        </p>
 <p>
-            When you work with dynamic histograms, you can also create a sequence
-            of axes at run-time and pass them to the factory:
-          </p>
+          When you work with dynamic histograms, you can also create a sequence of
+          axes at run-time and pass them to the factory:
+        </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">vector</span><span class="special">&gt;</span>
 
@@ -193,92 +183,90 @@
 <span class="special">}</span>
 </pre>
 <p>
-            <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>
-            cannot handle this case because a static histogram can only be constructed
-            when the number and types of all axes are known already at compile time.
-            While strictly speaking that is also true in this example, you could
-            have filled the vector also at run-time, based on run-time user input.
-          </p>
+          <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram">make_static_histogram</a></code>
+          cannot handle this case because a static histogram can only be constructed
+          when the number and types of all axes are known already at compile time.
+          While strictly speaking that is also true in this example, you could have
+          filled the vector also at run-time, based on run-time user input.
+        </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-              Memory for bin counters is allocated lazily, if the default storage
-              policy <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">adaptive_storage</a></code>
-              is used. Allocation is delayed to the first time, when input values
-              are passed to the histogram. Therefore memory allocation exceptions
-              are not thrown when the histogram is created, but possibly later. This
-              gives you a chance to check how much memory the histogram will allocate
-              and possibly give a warning if that amount is excessively large. Use
-              the method <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">size</span><span class="special">()</span></code> to see how many bins your axis layout
-              requires. At the first fill, that many bytes will be allocated. The
-              allocated amount of memory may grow further later when the capacity
-              of the bin counters needs to grow.
-            </p></td></tr>
+            Memory for bin counters is allocated lazily, if the default storage policy
+            <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">adaptive_storage</a></code>
+            is used. Allocation is delayed to the first time, when input values are
+            passed to the histogram. Therefore memory allocation exceptions are not
+            thrown when the histogram is created, but possibly later. This gives
+            you a chance to check how much memory the histogram will allocate and
+            possibly give a warning if that amount is excessively large. Use the
+            method <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">size</span><span class="special">()</span></code>
+            to see how many bins your axis layout requires. At the first fill, that
+            many bytes will be allocated. The allocated amount of memory may grow
+            further later when the capacity of the bin counters needs to grow.
+          </p></td></tr>
 </table></div>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h5 class="title">
-<a name="histogram.guide.cpp.create_a_histogram.axis_configuration"></a><a class="link" href="guide.html#histogram.guide.cpp.create_a_histogram.axis_configuration" title="Axis configuration">Axis
-          configuration</a>
-</h5></div></div></div>
+<div class="titlepage"><div><div><h4 class="title">
+<a name="histogram.guide.create_a_histogram.axis_configuration"></a><a class="link" href="guide.html#histogram.guide.create_a_histogram.axis_configuration" title="Axis configuration">Axis
+        configuration</a>
+</h4></div></div></div>
 <p>
-            The library comes with a number of axis classes (you can write your own,
-            too, see <a class="link" href="guide.html#histogram.guide.expert" title="Advanced usage">Advanced usage</a>).
-            The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/regular.html" title="Class template regular">regular axis</a></code>
-            should be your default choice, because it is simple and efficient. It
-            splits an interval over a continuous variable into <code class="computeroutput"><span class="identifier">N</span></code>
-            bins of equal width. If you want bins over a range of integers, the
-            <code class="computeroutput"><a class="link" href="../boost/histogram/axis/integer.html" title="Class template integer">integer axis</a></code>
-            is faster. If you have data which wraps around, like angles, use a <code class="computeroutput"><a class="link" href="../boost/histogram/axis/circular.html" title="Class template circular">circular axis</a></code>. If
-            your bins vary in width, use a <code class="computeroutput"><a class="link" href="../boost/histogram/axis/variable.html" title="Class template variable">variable
-            axis</a></code>. If you want to bin categorical values, like <code class="computeroutput"><span class="identifier">red</span></code>, <code class="computeroutput"><span class="identifier">blue</span></code>,
-            <code class="computeroutput"><span class="identifier">green</span></code>, you can use a
-            <code class="computeroutput"><a class="link" href="../boost/histogram/axis/category.html" title="Class template category">category axis</a></code>.
-          </p>
+          The library comes with a number of axis classes (you can write your own,
+          too, see <a class="link" href="guide.html#histogram.guide.expert" title="Advanced usage">Advanced usage</a>).
+          The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/regular.html" title="Class template regular">regular axis</a></code>
+          should be your default choice, because it is simple and efficient. It splits
+          an interval over a continuous variable into <code class="computeroutput"><span class="identifier">N</span></code>
+          bins of equal width. If you want bins over a range of integers, the <code class="computeroutput"><a class="link" href="../boost/histogram/axis/integer.html" title="Class template integer">integer axis</a></code> is faster.
+          If you have data which wraps around, like angles, use a <code class="computeroutput"><a class="link" href="../boost/histogram/axis/circular.html" title="Class template circular">circular
+          axis</a></code>. If your bins vary in width, use a <code class="computeroutput"><a class="link" href="../boost/histogram/axis/variable.html" title="Class template variable">variable
+          axis</a></code>. If you want to bin categorical values, like <code class="computeroutput"><span class="identifier">red</span></code>, <code class="computeroutput"><span class="identifier">blue</span></code>,
+          <code class="computeroutput"><span class="identifier">green</span></code>, you can use a <code class="computeroutput"><a class="link" href="../boost/histogram/axis/category.html" title="Class template category">category axis</a></code>.
+        </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-              All axes which define bins in terms of intervals always use semi-open
-              intervals by convention. The last value is never included. For example,
-              the axis <code class="computeroutput"><span class="identifier">axis</span><span class="special">::</span><span class="identifier">integer</span><span class="special">&lt;&gt;(</span><span class="number">0</span><span class="special">,</span> <span class="number">3</span><span class="special">)</span></code> has three bins with intervals <code class="computeroutput"><span class="special">[</span><span class="number">0</span><span class="special">,</span>
-              <span class="number">1</span><span class="special">),</span>
-              <span class="special">[</span><span class="number">1</span><span class="special">,</span> <span class="number">2</span><span class="special">),</span>
-              <span class="special">[</span><span class="number">2</span><span class="special">,</span> <span class="number">3</span><span class="special">)</span></code>.
-              To remember this, think of iterator ranges from <code class="computeroutput"><span class="identifier">begin</span></code>
-              to <code class="computeroutput"><span class="identifier">end</span></code>, where <code class="computeroutput"><span class="identifier">end</span></code> is also not included.
-            </p></td></tr>
+            All axes which define bins in terms of intervals always use semi-open
+            intervals by convention. The last value is never included. For example,
+            the axis <code class="computeroutput"><span class="identifier">axis</span><span class="special">::</span><span class="identifier">integer</span><span class="special">&lt;&gt;(</span><span class="number">0</span><span class="special">,</span> <span class="number">3</span><span class="special">)</span></code> has three bins with intervals <code class="computeroutput"><span class="special">[</span><span class="number">0</span><span class="special">,</span>
+            <span class="number">1</span><span class="special">),</span> <span class="special">[</span><span class="number">1</span><span class="special">,</span>
+            <span class="number">2</span><span class="special">),</span> <span class="special">[</span><span class="number">2</span><span class="special">,</span>
+            <span class="number">3</span><span class="special">)</span></code>.
+            To remember this, think of iterator ranges from <code class="computeroutput"><span class="identifier">begin</span></code>
+            to <code class="computeroutput"><span class="identifier">end</span></code>, where <code class="computeroutput"><span class="identifier">end</span></code> is also not included.
+          </p></td></tr>
 </table></div>
 <p>
-            Check the class descriptions for more information about each axis type.
-            All axes are templated on the data type, which means that you can use
-            a <code class="computeroutput"><a class="link" href="../boost/histogram/axis/regular.html" title="Class template regular">regular axis</a></code>
-            with floats or doubles, an <code class="computeroutput"><a class="link" href="../boost/histogram/axis/integer.html" title="Class template integer">integer
-            axis</a></code> with any kind of integer, and so on. Reasonable defaults
-            are provided, so usually you just pass an empty bracket to the class,
-            like in most examples in this guide.
-          </p>
+          Check the class descriptions for more information about each axis type.
+          All axes are templated on the data type, which means that you can use a
+          <code class="computeroutput"><a class="link" href="../boost/histogram/axis/regular.html" title="Class template regular">regular axis</a></code>
+          with floats or doubles, an <code class="computeroutput"><a class="link" href="../boost/histogram/axis/integer.html" title="Class template integer">integer
+          axis</a></code> with any kind of integer, and so on. Reasonable defaults
+          are provided, so usually you just pass an empty bracket to the class, like
+          in most examples in this guide.
+        </p>
 <p>
-            The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/regular.html" title="Class template regular">regular axis</a></code>
-            also accepts a second template parameter, a class that implements a bijective
-            transform between the data space and the space where the bins are equi-distant.
-            A <code class="computeroutput"><a class="link" href="../boost/histogram/axis/transform/log.html" title="Struct log">log transform</a></code>
-            is useful for data that is strictly positive and spans over many orders
-            of magnitude (masses of stellar objects are an example). Several other
-            transforms are provided. Users can define their own transforms and use
-            them with the axis.
-          </p>
+          The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/regular.html" title="Class template regular">regular axis</a></code>
+          also accepts a second template parameter, a class that implements a bijective
+          transform between the data space and the space where the bins are equi-distant.
+          A <code class="computeroutput"><a class="link" href="../boost/histogram/axis/transform/log.html" title="Struct log">log transform</a></code>
+          is useful for data that is strictly positive and spans over many orders
+          of magnitude (masses of stellar objects are an example). Several other
+          transforms are provided. Users can define their own transforms and use
+          them with the axis.
+        </p>
 <p>
-            In addition to the required parameters for an axis, you can assign an
-            optional label to any axis, which helps to remember what the axis is
-            about. Example: you have census data and you want to investigate how
-            yearly income correlates with age, you could do:
-          </p>
+          In addition to the required parameters for an axis, you can assign an optional
+          label to any axis, which helps to remember what the axis is about. Example:
+          you have census data and you want to investigate how yearly income correlates
+          with age, you could do:
+        </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 
 <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
@@ -293,21 +281,21 @@
 <span class="special">}</span>
 </pre>
 <p>
-            Without the labels it would be difficult to remember which axis was covering
-            which quantity, because they look the same otherwise. Labels are the
-            only axis property that can be changed later. Axes objects with different
-            label do not compare equal with <code class="computeroutput"><span class="keyword">operator</span><span class="special">==</span></code>.
-          </p>
+          Without the labels it would be difficult to remember which axis was covering
+          which quantity, because they look the same otherwise. Labels are the only
+          axis property that can be changed later. Axes objects with different label
+          do not compare equal with <code class="computeroutput"><span class="keyword">operator</span><span class="special">==</span></code>.
+        </p>
 <p>
-            By default, additional under- and overflow bins are added automatically
-            for each axis where that makes sense. If you create an axis with 20 bins,
-            the histogram will actually have 22 bins along that axis. The two extra
-            bins are generally very good to have, as explained in <a class="link" href="rationale.html#histogram.rationale.uoflow" title="Under- and overflow bins">the
-            rationale</a>. If you are certain that the input cannot exceed the
-            axis range, you can disable the extra bins to save memory. This is done
-            by passing the enum value <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.axis.uoflow_type">uoflow_type::off</a></code>
-            to the axis constructor:
-          </p>
+          By default, additional under- and overflow bins are added automatically
+          for each axis where that makes sense. If you create an axis with 20 bins,
+          the histogram will actually have 22 bins along that axis. The two extra
+          bins are generally very good to have, as explained in <a class="link" href="rationale.html#histogram.rationale.uoflow" title="Under- and overflow bins">the
+          rationale</a>. If you are certain that the input cannot exceed the axis
+          range, you can disable the extra bins to save memory. This is done by passing
+          the enum value <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.axis.uoflow_type">uoflow_type::off</a></code>
+          to the axis constructor:
+        </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 
 <span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
@@ -321,36 +309,35 @@
 <span class="special">}</span>
 </pre>
 <p>
-            We use an <code class="computeroutput"><a class="link" href="../boost/histogram/axis/integer.html" title="Class template integer">integer axis</a></code>
-            here, because the input values are integers and we want one bin for each
-            eye value.
-          </p>
+          We use an <code class="computeroutput"><a class="link" href="../boost/histogram/axis/integer.html" title="Class template integer">integer axis</a></code>
+          here, because the input values are integers and we want one bin for each
+          eye value.
+        </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-              The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/circular.html" title="Class template circular">circular axis</a></code>
-              never creates under- and overflow bins. The highest bin wraps around
-              to the lowest bin and vice versa, so there is no possibility for overflow.
-              The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/category.html" title="Class template category">category axis</a></code>
-              comes only with an "overflow" bin, which counts all types
-              of categorical input that was not recognized.
-            </p></td></tr>
+            The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/circular.html" title="Class template circular">circular axis</a></code>
+            never creates under- and overflow bins. The highest bin wraps around
+            to the lowest bin and vice versa, so there is no possibility for overflow.
+            The <code class="computeroutput"><a class="link" href="../boost/histogram/axis/category.html" title="Class template category">category axis</a></code>
+            comes only with an "overflow" bin, which counts all types of
+            categorical input that was not recognized.
+          </p></td></tr>
 </table></div>
 </div>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.cpp.fill_histogram"></a><a class="link" href="guide.html#histogram.guide.cpp.fill_histogram" title="Fill histogram">Fill histogram</a>
-</h4></div></div></div>
+<div class="titlepage"><div><div><h3 class="title">
+<a name="histogram.guide.fill_histogram"></a><a class="link" href="guide.html#histogram.guide.fill_histogram" title="Fill histogram">Fill histogram</a>
+</h3></div></div></div>
 <p>
-          After you created a histogram, you want to insert tuples of possibly multi-dimensional
-          and heterogenous values. This is done with the flexible <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code> call, which you typically do in a
-          loop. Some extra parameters can be passed to the method as shown in the
-          next example.
-        </p>
+        After you created a histogram, you want to insert tuples of possibly multi-dimensional
+        and heterogenous values. This is done with the flexible <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code> call, which you typically do in a loop.
+        Some extra parameters can be passed to the method as shown in the next example.
+      </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">utility</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">vector</span><span class="special">&gt;</span>
@@ -386,70 +373,68 @@
 <span class="special">}</span>
 </pre>
 <p>
-          <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
-          either takes <code class="computeroutput"><span class="identifier">N</span></code> arguments
-          or a container with <code class="computeroutput"><span class="identifier">N</span></code> elements,
-          where <code class="computeroutput"><span class="identifier">N</span></code> is equal to the
-          number of axes of the histogram. It finds the corresponding bin, and increments
-          the bin counter by one.
-        </p>
+        <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
+        either takes <code class="computeroutput"><span class="identifier">N</span></code> arguments
+        or a container with <code class="computeroutput"><span class="identifier">N</span></code> elements,
+        where <code class="computeroutput"><span class="identifier">N</span></code> is equal to the number
+        of axes of the histogram. It finds the corresponding bin, and increments
+        the bin counter by one.
+      </p>
 <p>
-          <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">),</span> <span class="special">...)</span></code> does the same as the first call, but
-          increments the bin counter by the value <code class="computeroutput"><span class="identifier">x</span></code>.
-          The type of <code class="computeroutput"><span class="identifier">x</span></code> is not restricted,
-          usually it is a real number. The <code class="computeroutput"><span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">)</span></code>
-          helper class must be first argument. You can freely mix calls with and
-          without a <code class="computeroutput"><span class="identifier">weight</span></code>. Calls
-          without a <code class="computeroutput"><span class="identifier">weight</span></code> act like
-          the weight is <code class="computeroutput"><span class="number">1</span></code>.
-        </p>
+        <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">),</span> <span class="special">...)</span></code>
+        does the same as the first call, but increments the bin counter by the value
+        <code class="computeroutput"><span class="identifier">x</span></code>. The type of <code class="computeroutput"><span class="identifier">x</span></code> is not restricted, usually it is a real
+        number. The <code class="computeroutput"><span class="identifier">weight</span><span class="special">(</span><span class="identifier">x</span><span class="special">)</span></code> helper
+        class must be first argument. You can freely mix calls with and without a
+        <code class="computeroutput"><span class="identifier">weight</span></code>. Calls without a
+        <code class="computeroutput"><span class="identifier">weight</span></code> act like the weight
+        is <code class="computeroutput"><span class="number">1</span></code>.
+      </p>
 <p>
-          Why weighted increments are sometimes useful, especially in a scientific
-          context, is explained <a class="link" href="rationale.html#histogram.rationale.weights" title="Support of weighted fills">in the
-          rationale</a>. If you don't see the point, you can just ignore this
-          type of call. This feature does not affect the performance of the histogram
-          if you don't use it.
-        </p>
+        Why weighted increments are sometimes useful, especially in a scientific
+        context, is explained <a class="link" href="rationale.html#histogram.rationale.weights" title="Support of weighted fills">in the
+        rationale</a>. If you don't see the point, you can just ignore this type
+        of call. This feature does not affect the performance of the histogram if
+        you don't use it.
+      </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-            The first call to a weighted fill internally switches the default storage
-            from integral counters to another type, which holds two real numbers
-            per bin, one for the sum of weights (the weighted count), and another
-            for the sum of weights squared (the variance of the weighted count).
-            This is not necessary for unweighted fills, because the two sums are
-            identical is all weights are <code class="computeroutput"><span class="number">1</span></code>.
-            The default storage automatically optimizes this case by using only one
-            integral number per bin as long as no weights are encountered.
-          </p></td></tr>
+          The first call to a weighted fill internally switches the default storage
+          from integral counters to another type, which holds two real numbers per
+          bin, one for the sum of weights (the weighted count), and another for the
+          sum of weights squared (the variance of the weighted count). This is not
+          necessary for unweighted fills, because the two sums are identical is all
+          weights are <code class="computeroutput"><span class="number">1</span></code>. The default
+          storage automatically optimizes this case by using only one integral number
+          per bin as long as no weights are encountered.
+        </p></td></tr>
 </table></div>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.cpp.access_bin_counts"></a><a class="link" href="guide.html#histogram.guide.cpp.access_bin_counts" title="Access bin counts">Access bin counts</a>
-</h4></div></div></div>
+<div class="titlepage"><div><div><h3 class="title">
+<a name="histogram.guide.access_bin_counts"></a><a class="link" href="guide.html#histogram.guide.access_bin_counts" title="Access bin counts">Access bin counts</a>
+</h3></div></div></div>
 <p>
-          After the histogram has been filled, you want to access the counts per
-          bin at some point. You may want to visualize the counts, or compute some
-          quantities like the mean from the data distribution approximated by the
-          histogram.
-        </p>
+        After the histogram has been filled, you want to access the counts per bin
+        at some point. You may want to visualize the counts, or compute some quantities
+        like the mean from the data distribution approximated by the histogram.
+      </p>
 <p>
-          To access each bin, you use a multi-dimensional index, which consists of
-          a sequence of bin indices for each axes in order. You can use this index
-          to access the value for each and the variance estimate, using the method
-          <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">at</span><span class="special">(...)</span></code>
-          (in analogy to <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">::</span><span class="identifier">at</span></code>). It accepts integral indices, one
-          for each axis of the histogram, and returns the associated bin counter
-          type. The bin counter type then allows you to access the count value and
-          its variance.
-        </p>
+        To access each bin, you use a multi-dimensional index, which consists of
+        a sequence of bin indices for each axes in order. You can use this index
+        to access the value for each and the variance estimate, using the method
+        <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">at</span><span class="special">(...)</span></code>
+        (in analogy to <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">::</span><span class="identifier">at</span></code>). It accepts integral indices, one for
+        each axis of the histogram, and returns the associated bin counter type.
+        The bin counter type then allows you to access the count value and its variance.
+      </p>
 <p>
-          The calls are demonstrated in the next example.
-        </p>
+        The calls are demonstrated in the next example.
+      </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">iostream</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">numeric</span><span class="special">&gt;</span>
@@ -515,78 +500,73 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-            The numbers returned by <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code> and <code class="computeroutput"><span class="identifier">variance</span><span class="special">()</span></code> are always equal, if weighted fills
-            are not used. The internal structure, which handles the bin counters,
-            has been optimised for this common case. Internally only a single integral
-            number per bin is used until a weighted fill, then the counters internally
-            switch to storing two real numbers per bin. If the very first call to
-            <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
-            is already a weighted increment, the two real numbers per bin are allocated
-            directly without any superfluous conversion from integral counters to
-            double counters. This special case is efficiently handled.
-          </p></td></tr>
+          The numbers returned by <code class="computeroutput"><span class="identifier">value</span><span class="special">()</span></code> and <code class="computeroutput"><span class="identifier">variance</span><span class="special">()</span></code> are always equal, if weighted fills are
+          not used. The internal structure, which handles the bin counters, has been
+          optimised for this common case. Internally only a single integral number
+          per bin is used until a weighted fill, then the counters internally switch
+          to storing two real numbers per bin. If the very first call to <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
+          is already a weighted increment, the two real numbers per bin are allocated
+          directly without any superfluous conversion from integral counters to double
+          counters. This special case is efficiently handled.
+        </p></td></tr>
 </table></div>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.cpp.arithmetic_operators"></a><a class="link" href="guide.html#histogram.guide.cpp.arithmetic_operators" title="Arithmetic operators">Arithmetic
-        operators</a>
-</h4></div></div></div>
+<div class="titlepage"><div><div><h3 class="title">
+<a name="histogram.guide.arithmetic_operators"></a><a class="link" href="guide.html#histogram.guide.arithmetic_operators" title="Arithmetic operators">Arithmetic operators</a>
+</h3></div></div></div>
 <p>
-          Some arithmetic operations are supported for histograms. Histograms are...
-        </p>
+        Some arithmetic operations are supported for histograms. Histograms are...
+      </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-              equal comparable
-            </li>
+            equal comparable
+          </li>
 <li class="listitem">
-              addable (adding histograms with non-matching axes is an error)
-            </li>
+            addable (adding histograms with non-matching axes is an error)
+          </li>
 <li class="listitem">
-              multipliable and divisible by a number
-            </li>
+            multipliable and divisible by a number
+          </li>
 </ul></div>
 <p>
-          These operations are commutative, except for division. Dividing a number
-          by a histogram is not implemented.
-        </p>
+        These operations are commutative, except for division. Dividing a number
+        by a histogram is not implemented.
+      </p>
 <p>
-          Two histograms compare equal, if...
-        </p>
+        Two histograms compare equal, if...
+      </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-              all axes compare equal, including axis labels
-            </li>
+            all axes compare equal, including axis labels
+          </li>
 <li class="listitem">
-              all values and variance estimates compare equal
-            </li>
+            all values and variance estimates compare equal
+          </li>
 </ul></div>
 <p>
-          Adding histograms is useful, if you want to parallelize the filling of
-          a histogram over several threads or processes. Fill independent copies
-          of the histogram in worker threads, and then add them all up in the main
-          thread.
-        </p>
+        Adding histograms is useful, if you want to parallelize the filling of a
+        histogram over several threads or processes. Fill independent copies of the
+        histogram in worker threads, and then add them all up in the main thread.
+      </p>
 <p>
-          Multiplying by a number is useful to re-weight histograms before adding
-          them, for those who need to work with weights. Multiplying by a factor
-          <code class="computeroutput"><span class="identifier">x</span></code> has a different effect
-          on value and variance of each bin counter. The value is multiplied by
-          <code class="computeroutput"><span class="identifier">x</span></code>, but the variance is
-          multiplied by <code class="computeroutput"><span class="identifier">x</span><span class="special">*</span><span class="identifier">x</span></code>. This follows from the properties of
-          the variance, as explained in <a class="link" href="rationale.html#histogram.rationale.variance" title="Variance estimates">the
-          rationale</a>.
-        </p>
+        Multiplying by a number is useful to re-weight histograms before adding them,
+        for those who need to work with weights. Multiplying by a factor <code class="computeroutput"><span class="identifier">x</span></code> has a different effect on value and variance
+        of each bin counter. The value is multiplied by <code class="computeroutput"><span class="identifier">x</span></code>,
+        but the variance is multiplied by <code class="computeroutput"><span class="identifier">x</span><span class="special">*</span><span class="identifier">x</span></code>. This
+        follows from the properties of the variance, as explained in <a class="link" href="rationale.html#histogram.rationale.variance" title="Variance estimates">the
+        rationale</a>.
+      </p>
 <div class="warning"><table border="0" summary="Warning">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="../../../doc/src/images/warning.png"></td>
 <th align="left">Warning</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-            Because of special behavior of the variance, adding a histogram to itself
-            is not identical to multiplying the original histogram by two, as far
-            as the variance is concerned.
-          </p></td></tr>
+          Because of special behavior of the variance, adding a histogram to itself
+          is not identical to multiplying the original histogram by two, as far as
+          the variance is concerned.
+        </p></td></tr>
 </table></div>
 <div class="note"><table border="0" summary="Note">
 <tr>
@@ -594,14 +574,14 @@
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-            Scaling a histogram automatically converts the bin counters from an integral
-            number per bin to two real numbers per bin, if that has not happened
-            already, because value and variance are different after the multiplication.
-          </p></td></tr>
+          Scaling a histogram automatically converts the bin counters from an integral
+          number per bin to two real numbers per bin, if that has not happened already,
+          because value and variance are different after the multiplication.
+        </p></td></tr>
 </table></div>
 <p>
-          Here is an example which demonstrates the supported operators.
-        </p>
+        Here is an example which demonstrates the supported operators.
+      </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">iostream</span><span class="special">&gt;</span>
 
@@ -658,27 +638,27 @@
 </pre>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.cpp.reductions"></a><a class="link" href="guide.html#histogram.guide.cpp.reductions" title="Reductions">Reductions</a>
-</h4></div></div></div>
+<div class="titlepage"><div><div><h3 class="title">
+<a name="histogram.guide.reductions"></a><a class="link" href="guide.html#histogram.guide.reductions" title="Reductions">Reductions</a>
+</h3></div></div></div>
 <p>
-          When you have a high-dimensional histogram, sometimes you want to remove
-          some axes and look the equivalent lower-dimensional version obtained by
-          summing over the counts along the removed axes. Perhaps you found out that
-          there is no interesting structure along an axis, so it is not worth keeping
-          that axies around, or you want to visualize 1d or 2d projections of a high-dimensional
-          histogram.
-        </p>
+        When you have a high-dimensional histogram, sometimes you want to remove
+        some axes and look the equivalent lower-dimensional version obtained by summing
+        over the counts along the removed axes. Perhaps you found out that there
+        is no interesting structure along an axis, so it is not worth keeping that
+        axies around, or you want to visualize 1d or 2d projections of a high-dimensional
+        histogram.
+      </p>
 <p>
-          For this purpose use the <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">reduce_to</span><span class="special">(...)</span></code> method, which returns a new reduced
-          histogram with fewer axes. The method accepts indices (one or more), which
-          indicate the axes that are kept. The static histogram only accepts compile-time
-          numbers, while the dynamic histogram also accepts runtime numbers and iterators
-          over numbers.
-        </p>
+        For this purpose use the <code class="computeroutput"><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">reduce_to</span><span class="special">(...)</span></code> method, which returns a new reduced
+        histogram with fewer axes. The method accepts indices (one or more), which
+        indicate the axes that are kept. The static histogram only accepts compile-time
+        numbers, while the dynamic histogram also accepts runtime numbers and iterators
+        over numbers.
+      </p>
 <p>
-          Here is an example to illustrates this.
-        </p>
+        Here is an example to illustrates this.
+      </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">iostream</span><span class="special">&gt;</span>
 
@@ -735,18 +715,20 @@
 </pre>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.cpp.streaming"></a><a class="link" href="guide.html#histogram.guide.cpp.streaming" title="Streaming">Streaming</a>
-</h4></div></div></div>
+<div class="titlepage"><div><div><h3 class="title">
+<a name="histogram.guide.streaming"></a><a class="link" href="guide.html#histogram.guide.streaming" title="Streaming">Streaming</a>
+</h3></div></div></div>
 <p>
-          Simple ostream operators are shipped with the library, which are internally
-          used by the Python interface bindings. These give text representations
-          of axis and histogram configurations, but do not show the histogram content.
-          For users, the builtin streaming operators may be useful for debugging.
-          They are not included by the super header <code class="computeroutput"><span class="preprocessor">#include</span>
-          <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>, so that users can use their own implementations.
-          The following example shows the effect of output streaming.
-        </p>
+        Simple ostream operators are shipped with the library, which are internally
+        used by the unit tests. These give text representations of axis and histogram
+        configurations, but do not show the histogram content. They may be useful
+        for debugging, but users are encouraged to write their own ostream operators.
+        Therefore, the headers with the builtin implementations are not included
+        by the super header <code class="computeroutput"><span class="preprocessor">#include</span>
+        <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>,
+        so that users can use their own implementations. The following example shows
+        the effect of output streaming.
+      </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">/</span><span class="identifier">ostream_operators</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">iostream</span><span class="special">&gt;</span>
@@ -784,16 +766,14 @@
 </pre>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.cpp.serialization"></a><a class="link" href="guide.html#histogram.guide.cpp.serialization" title="Serialization">Serialization</a>
-</h4></div></div></div>
+<div class="titlepage"><div><div><h3 class="title">
+<a name="histogram.guide.serialization"></a><a class="link" href="guide.html#histogram.guide.serialization" title="Serialization">Serialization</a>
+</h3></div></div></div>
 <p>
-          The library supports serialization via <a href="../../../libs/serialization/index.html" target="_top">Boost.Serialization</a>.
-          The serialization machinery is used in the Python module to enable pickling
-          of histograms. The streaming code is not included by the super header
-          <code class="computeroutput"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>,
-          so that the library can be used without having Boost.Serialization installed.
-        </p>
+        The library supports serialization via <a href="../../../libs/serialization/index.html" target="_top">Boost.Serialization</a>.
+        The serialization code is not included by the super header <code class="computeroutput"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span></code>,
+        so that the library can be used without Boost.Serialization.
+      </p>
 <pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">archive</span><span class="special">/</span><span class="identifier">text_iarchive</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">archive</span><span class="special">/</span><span class="identifier">text_oarchive</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
 <span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
@@ -833,361 +813,6 @@
   <span class="comment">// prints: after restore 1</span>
 <span class="special">}</span>
 </pre>
-</div>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="histogram.guide.python"></a><a class="link" href="guide.html#histogram.guide.python" title="Python usage">Python usage</a>
-</h3></div></div></div>
-<div class="toc"><dl class="toc">
-<dt><span class="section"><a href="guide.html#histogram.guide.python.python_interface">Python interface</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.python.numpy">Numpy support</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.python.operator_support_and_pickling">Operator
-        support and pickling</a></span></dt>
-<dt><span class="section"><a href="guide.html#histogram.guide.python.mixing_python_and_c">Mixing
-        Python and C++</a></span></dt>
-</dl></div>
-<p>
-        The C++ histogram has Python-bindings, so you can create and fill histograms
-        in Python.
-      </p>
-<div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.python.python_interface"></a><a class="link" href="guide.html#histogram.guide.python.python_interface" title="Python interface">Python interface</a>
-</h4></div></div></div>
-<p>
-          To access the histogram from Python, you need to compile the corresponding
-          module, which you can then import via <code class="computeroutput"><span class="identifier">import</span>
-          <span class="identifier">histogram</span></code> in Python.
-        </p>
-<p>
-          The Python interface generally mimics the C++ interface. All methods on
-          the C++ side have an equivalent on the Python side. Typical C++ idioms
-          have been replaced with equivalent Python idioms:
-        </p>
-<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
-<li class="listitem">
-              methods which take no argument and just return a value are represented
-              by properties in Python
-            </li>
-<li class="listitem">
-              axis objects support the sequence protocol (e.g. len(x) instead of
-              x.size)
-            </li>
-<li class="listitem">
-              <code class="computeroutput"><span class="identifier">weight</span></code>s are passed
-              via a keyword argument with the same name
-            </li>
-</ul></div>
-<p>
-          The documentation of the Python interface is best explored from within
-          the Python interpreter (type <code class="computeroutput"><span class="identifier">help</span><span class="special">()</span></code>, then <code class="computeroutput"><span class="identifier">histogram</span></code>).
-        </p>
-<p>
-          Here is an example of the Python module in action.
-        </p>
-<pre class="programlisting"><span class="keyword">import</span> <span class="identifier">histogram</span> <span class="keyword">as</span> <span class="identifier">hg</span>
-
-<span class="comment"># make 1-d histogram with 5 logarithmic bins from 1e0 to 1e5</span>
-<span class="identifier">h</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular_log</span><span class="special">(</span><span class="number">5</span><span class="special">,</span> <span class="number">1e0</span><span class="special">,</span> <span class="number">1e5</span><span class="special">,</span> <span class="string">"x"</span><span class="special">))</span>
-
-<span class="comment"># fill histogram with numbers</span>
-<span class="keyword">for</span> <span class="identifier">x</span> <span class="keyword">in</span> <span class="special">(</span><span class="number">2e0</span><span class="special">,</span> <span class="number">2e1</span><span class="special">,</span> <span class="number">2e2</span><span class="special">,</span> <span class="number">2e3</span><span class="special">,</span> <span class="number">2e4</span><span class="special">):</span>
-    <span class="identifier">h</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">weight</span><span class="special">=</span><span class="number">4</span><span class="special">)</span> <span class="comment"># increment bin counter by 4</span>
-
-<span class="comment"># iterate over bins and access bin counter</span>
-<span class="keyword">for</span> <span class="identifier">idx</span><span class="special">,</span> <span class="special">(</span><span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">)</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)):</span>
-    <span class="keyword">print</span><span class="special">(</span><span class="string">"bin {0} x in [{1}, {2}): {3} +/- {4}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span>
-        <span class="identifier">idx</span><span class="special">,</span> <span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">idx</span><span class="special">).</span><span class="identifier">variance</span> <span class="special">**</span> <span class="number">0.5</span><span class="special">))</span>
-
-<span class="comment"># under- and overflow bins are accessed like in C++</span>
-<span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)[-</span><span class="number">1</span><span class="special">]</span>
-<span class="keyword">print</span><span class="special">(</span><span class="string">"underflow [{0}, {1}): {2} +/- {3}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span><span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(-</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(-</span><span class="number">1</span><span class="special">).</span><span class="identifier">variance</span><span class="special">))</span>
-<span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span> <span class="special">=</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)[</span><span class="number">5</span><span class="special">]</span>
-<span class="keyword">print</span><span class="special">(</span><span class="string">"overflow  [{0}, {1}): {2} +/- {3}"</span><span class="special">.</span><span class="identifier">format</span><span class="special">(</span><span class="identifier">lo</span><span class="special">,</span> <span class="identifier">up</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">5</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">5</span><span class="special">).</span><span class="identifier">variance</span><span class="special">))</span>
-
-<span class="comment"># prints:</span>
-<span class="comment"># bin 0 x in [1.0, 10.0): 4.0 +/- 4.0</span>
-<span class="comment"># bin 1 x in [10.0, 100.0): 4.0 +/- 4.0</span>
-<span class="comment"># bin 2 x in [100.0, 1000.0): 4.0 +/- 4.0</span>
-<span class="comment"># bin 3 x in [1000.0, 10000.0): 4.0 +/- 4.0</span>
-<span class="comment"># bin 4 x in [10000.0, 100000.0): 4.0 +/- 4.0</span>
-<span class="comment"># underflow [0.0, 1.0): 0.0 +/- 0.0</span>
-<span class="comment"># overflow  [100000.0, inf): 0.0 +/- 0.0</span>
-</pre>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.python.numpy"></a><a class="link" href="guide.html#histogram.guide.python.numpy" title="Numpy support">Numpy support</a>
-</h4></div></div></div>
-<p>
-          Looping over a large collection of numbers in Python to fill a histogram
-          is very slow. If the Python module was build with Numpy support, the input
-          values can be passed as Numpy arrays. This is very fast and convenient.
-          The performance is almost as good as using C++ directly, and usually better
-          than Numpy's histogram functions, see the <a class="link" href="benchmarks.html" title="Benchmarks">benchmark</a>.
-          Here is an example to illustrate:
-        </p>
-<pre class="programlisting"><span class="keyword">import</span> <span class="identifier">histogram</span> <span class="keyword">as</span> <span class="identifier">hg</span>
-<span class="keyword">import</span> <span class="identifier">numpy</span> <span class="keyword">as</span> <span class="identifier">np</span>
-
-<span class="comment"># create 2d-histogram with two axes with 10 equidistant bins from -3 to 3</span>
-<span class="identifier">h</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">10</span><span class="special">,</span> <span class="special">-</span><span class="number">3</span><span class="special">,</span> <span class="number">3</span><span class="special">,</span> <span class="string">"x"</span><span class="special">),</span>
-                 <span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">10</span><span class="special">,</span> <span class="special">-</span><span class="number">3</span><span class="special">,</span> <span class="number">3</span><span class="special">,</span> <span class="string">"y"</span><span class="special">))</span>
-
-<span class="comment"># generate some numpy arrays with data to fill into histogram,</span>
-<span class="comment"># in this case normal distributed random numbers in x and y</span>
-<span class="identifier">x</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">random</span><span class="special">.</span><span class="identifier">randn</span><span class="special">(</span><span class="number">1000</span><span class="special">)</span>
-<span class="identifier">y</span> <span class="special">=</span> <span class="number">0.5</span> <span class="special">*</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">random</span><span class="special">.</span><span class="identifier">randn</span><span class="special">(</span><span class="number">1000</span><span class="special">)</span>
-
-<span class="comment"># fill histogram with numpy arrays, this is very fast</span>
-<span class="identifier">h</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">)</span> <span class="comment"># call looks the same as if x, y were values</span>
-
-<span class="comment"># get representations of the bin edges as Numpy arrays; this representation</span>
-<span class="comment"># differs from `list(h.axis(0))` as explained in the next example</span>
-<span class="identifier">x</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">array</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">))</span>
-<span class="identifier">y</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">array</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">))</span>
-
-<span class="comment"># creates a view of the counts (no copy involved)</span>
-<span class="identifier">count_matrix</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">asarray</span><span class="special">(</span><span class="identifier">h</span><span class="special">)</span>
-
-<span class="comment"># cut off the under- and overflow bins to not confuse matplotib (no copy)</span>
-<span class="identifier">reduced_count_matrix</span> <span class="special">=</span> <span class="identifier">count_matrix</span><span class="special">[:-</span><span class="number">2</span><span class="special">,:-</span><span class="number">2</span><span class="special">]</span>
-
-<span class="keyword">try</span><span class="special">:</span>
-    <span class="comment"># draw the count matrix</span>
-    <span class="keyword">import</span> <span class="identifier">matplotlib</span><span class="special">.</span><span class="identifier">pyplot</span> <span class="keyword">as</span> <span class="identifier">plt</span>
-    <span class="identifier">plt</span><span class="special">.</span><span class="identifier">pcolor</span><span class="special">(</span><span class="identifier">x</span><span class="special">,</span> <span class="identifier">y</span><span class="special">,</span> <span class="identifier">reduced_count_matrix</span><span class="special">.</span><span class="identifier">T</span><span class="special">)</span>
-    <span class="identifier">plt</span><span class="special">.</span><span class="identifier">xlabel</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">label</span><span class="special">)</span>
-    <span class="identifier">plt</span><span class="special">.</span><span class="identifier">ylabel</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">label</span><span class="special">)</span>
-    <span class="identifier">plt</span><span class="special">.</span><span class="identifier">savefig</span><span class="special">(</span><span class="string">"example_2d_python.png"</span><span class="special">)</span>
-<span class="keyword">except</span> <span class="identifier">ImportError</span><span class="special">:</span>
-    <span class="comment"># ok, no matplotlib, then just print the full count matrix</span>
-    <span class="keyword">print</span><span class="special">(</span><span class="identifier">count_matrix</span><span class="special">)</span>
-
-    <span class="comment"># output of the print looks something like this, the two right-most rows</span>
-    <span class="comment"># and two down-most columns represent under-/overflow bins</span>
-    <span class="comment"># [[ 0  0  0  1  5  0  0  1  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  1 17 11  6  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  5 31 26  4  1  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  3 20 59 62 26  4  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  1 26 96 89 16  1  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  4 21 86 84 20  1  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  1 24 71 50 15  2  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  6 26 37  7  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  0 11 10  2  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  1  2  3  1  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  0  0  2  0  0  0  0  0  0]</span>
-    <span class="comment">#  [ 0  0  0  0  0  1  0  0  0  0  0  0]]</span>
-</pre>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-            <code class="computeroutput"><span class="identifier">histogram</span><span class="special">(...)</span></code>
-            accepts any sequence that can be converted into a Numpy array with <code class="computeroutput"><span class="identifier">dtype</span><span class="special">=</span><span class="keyword">float</span></code> for convenience. To achieve the
-            best performance, use numpy arrays with dtype <code class="computeroutput"><span class="keyword">float</span></code>
-            as input to avoid a conversion.
-          </p></td></tr>
-</table></div>
-<p>
-          The conversion of an axis to a Numpy array has been optimised for interoperability
-          with other Numpy functions and matplotlib. For an axis with <code class="computeroutput"><span class="identifier">N</span></code> bins, a sequence of bin edges is generated
-          of length <code class="computeroutput"><span class="identifier">N</span><span class="special">+</span><span class="number">1</span></code>. The Numpy array is a unique ordered sequence
-          of all bin edges, including the upper edge of the last bin. The following
-          code illustrates how the sequence is constructed.
-        </p>
-<pre class="programlisting"><span class="keyword">import</span> <span class="identifier">histogram</span> <span class="keyword">as</span> <span class="identifier">hg</span>
-<span class="keyword">import</span> <span class="identifier">numpy</span> <span class="keyword">as</span> <span class="identifier">np</span>
-
-<span class="identifier">ax</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">5</span><span class="special">,</span> <span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">)</span>
-<span class="identifier">xedge1</span> <span class="special">=</span> <span class="identifier">np</span><span class="special">.</span><span class="identifier">array</span><span class="special">(</span><span class="identifier">ax</span><span class="special">)</span> <span class="comment"># this is equivalent to...</span>
-<span class="identifier">xedge2</span> <span class="special">=</span> <span class="special">[]</span>
-<span class="keyword">for</span> <span class="identifier">idx</span><span class="special">,</span> <span class="special">(</span><span class="identifier">lower</span><span class="special">,</span> <span class="identifier">upper</span><span class="special">)</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">ax</span><span class="special">):</span>
-    <span class="identifier">xedge2</span><span class="special">.</span><span class="identifier">append</span><span class="special">(</span><span class="identifier">lower</span><span class="special">)</span>
-    <span class="keyword">if</span> <span class="identifier">idx</span> <span class="special">==</span> <span class="identifier">len</span><span class="special">(</span><span class="identifier">ax</span><span class="special">)-</span><span class="number">1</span><span class="special">:</span>
-        <span class="identifier">xedge2</span><span class="special">.</span><span class="identifier">append</span><span class="special">(</span><span class="identifier">upper</span><span class="special">)</span>
-
-<span class="keyword">print</span><span class="special">(</span><span class="identifier">xedge1</span><span class="special">)</span>
-<span class="keyword">print</span><span class="special">(</span><span class="identifier">xedge2</span><span class="special">)</span>
-
-<span class="comment"># prints:</span>
-<span class="comment"># [ 0.   0.2  0.4  0.6  0.8  1. ]</span>
-<span class="comment"># [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]</span>
-
-<span class="comment"># sequences constructed from an axis use its iterator, the result differs</span>
-<span class="identifier">xedge3</span> <span class="special">=</span> <span class="identifier">list</span><span class="special">(</span><span class="identifier">ax</span><span class="special">)</span>
-
-<span class="keyword">print</span><span class="special">(</span><span class="identifier">xedge3</span><span class="special">)</span>
-
-<span class="comment"># prints:</span>
-<span class="comment"># [(0., 0.2), (0.2, 0.4), (0.4, 0.6), (0.8, 1.0)]</span>
-</pre>
-<p>
-          Using a Numpy array to view the count matrix reveals an implementation
-          detail of how under- and overflow bins are stored internally. For a 1-d
-          histogram with 5 bins, the counter structure looks like this:
-        </p>
-<pre class="programlisting"><span class="identifier">bin0</span> <span class="identifier">bin1</span> <span class="identifier">bin2</span> <span class="identifier">bin3</span> <span class="identifier">bin4</span> <span class="identifier">overflow</span> <span class="identifier">underflow</span>
-</pre>
-<p>
-          There are seven counters in total. The overflow bin naturally follows in
-          order after the normal bins. The position of the underflow bin is surprising,
-          but exploits how Python uses negative indices to access elements relative
-          to the end of a sequence. Since the index <code class="computeroutput"><span class="special">-</span><span class="number">1</span></code> accesses the last counter in the sequence,
-          the underflow bin is put there.
-        </p>
-<p>
-          It is very easy to crop the extra counters by slicing each dimension with
-          the slice shorthand <code class="computeroutput"><span class="special">:-</span><span class="number">2</span></code>,
-          which just removes the last two bins.
-        </p>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.python.operator_support_and_pickling"></a><a class="link" href="guide.html#histogram.guide.python.operator_support_and_pickling" title="Operator support and pickling">Operator
-        support and pickling</a>
-</h4></div></div></div>
-<p>
-          Histograms in Python support the same operators as in C++. In addition,
-          histograms support the Pickle protocol. An example:
-        </p>
-<pre class="programlisting"><span class="keyword">import</span> <span class="identifier">histogram</span> <span class="keyword">as</span> <span class="identifier">hg</span>
-<span class="keyword">import</span> <span class="identifier">pickle</span>
-
-<span class="identifier">h1</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">hg</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">2</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">,</span> <span class="number">1</span><span class="special">))</span>
-<span class="identifier">h2</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">h1</span><span class="special">)</span> <span class="comment"># creates copy</span>
-<span class="identifier">h1</span><span class="special">(-</span><span class="number">0.5</span><span class="special">)</span>
-<span class="identifier">h2</span><span class="special">(</span><span class="number">0.5</span><span class="special">)</span>
-
-<span class="comment"># arithmetic operators (see performance note below)</span>
-<span class="identifier">h3</span> <span class="special">=</span> <span class="identifier">h1</span> <span class="special">+</span> <span class="identifier">h2</span>
-<span class="identifier">h4</span> <span class="special">=</span> <span class="identifier">h3</span> <span class="special">*</span> <span class="number">2</span>
-
-<span class="keyword">print</span><span class="special">(</span><span class="identifier">h4</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">0</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">h4</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="number">1</span><span class="special">).</span><span class="identifier">value</span><span class="special">)</span>
-<span class="comment"># prints: 2.0 2.0</span>
-
-<span class="comment"># now save the histogram</span>
-<span class="identifier">with</span> <span class="identifier">open</span><span class="special">(</span><span class="string">"h4_saved.pkl"</span><span class="special">,</span> <span class="string">"wb"</span><span class="special">)</span> <span class="keyword">as</span> <span class="identifier">f</span><span class="special">:</span>
-    <span class="identifier">pickle</span><span class="special">.</span><span class="identifier">dump</span><span class="special">(</span><span class="identifier">h4</span><span class="special">,</span> <span class="identifier">f</span><span class="special">)</span>
-<span class="identifier">with</span> <span class="identifier">open</span><span class="special">(</span><span class="string">"h4_saved.pkl"</span><span class="special">,</span> <span class="string">"rb"</span><span class="special">)</span> <span class="keyword">as</span> <span class="identifier">f</span><span class="special">:</span>
-    <span class="identifier">h5</span> <span class="special">=</span> <span class="identifier">pickle</span><span class="special">.</span><span class="identifier">load</span><span class="special">(</span><span class="identifier">f</span><span class="special">)</span>
-
-<span class="keyword">print</span><span class="special">(</span><span class="identifier">h4</span> <span class="special">==</span> <span class="identifier">h5</span><span class="special">)</span>
-<span class="comment"># prints: True</span>
-</pre>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top">
-<p>
-            Python has no concept of rvalue references and therefore cannot avoid
-            creating temporary objects in arithmetic operations like C++ can. A statement
-            <code class="computeroutput"><span class="identifier">h3</span> <span class="special">=</span>
-            <span class="identifier">h1</span> <span class="special">+</span>
-            <span class="identifier">h2</span></code> is equivalent to <code class="computeroutput"><span class="identifier">tmp</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">h1</span><span class="special">);</span> <span class="identifier">tmp</span> <span class="special">+=</span> <span class="identifier">h2</span><span class="special">;</span> <span class="identifier">h3</span> <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">tmp</span><span class="special">)</span></code>,
-            which amounts to two allocations, one in the first and one in the last
-            copy-assignment, while only one allocation is really necessary.
-          </p>
-<p>
-            To avoid creating superfluous temporaries, write your code entirely with
-            operators <code class="computeroutput"><span class="special">+=</span></code> and <code class="computeroutput"><span class="special">*=</span></code>, this is always possible. In the example
-            above, the optimised code would be: <code class="computeroutput"><span class="identifier">h3</span>
-            <span class="special">=</span> <span class="identifier">hg</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">h1</span><span class="special">);</span> <span class="identifier">h3</span> <span class="special">+=</span> <span class="identifier">h2</span></code>.
-            It is actually quite puzzling why Python does not do such simple optimisations
-            by itself.
-          </p>
-</td></tr>
-</table></div>
-<div class="warning"><table border="0" summary="Warning">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Warning]" src="../../../doc/src/images/warning.png"></td>
-<th align="left">Warning</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-            Pickling in Python uses a binary representation which is <span class="bold"><strong>not</strong></span>
-            portable between different hardware platforms. It will only work on platforms
-            with the same endianess and same floating point binary format. In practice,
-            most computing clusters and most consumer hardware are x86 compatible
-            nowadays. The binary representation is portable between such hardware
-            platforms. It is also portable between operating systems on the same
-            hardware platform, like OSX, Windows, and Linux.
-          </p></td></tr>
-</table></div>
-</div>
-<div class="section">
-<div class="titlepage"><div><div><h4 class="title">
-<a name="histogram.guide.python.mixing_python_and_c"></a><a class="link" href="guide.html#histogram.guide.python.mixing_python_and_c" title="Mixing Python and C++">Mixing
-        Python and C++</a>
-</h4></div></div></div>
-<p>
-          It is an efficient workflow to create and configure histograms in Python
-          and then pass them to some C++ code which fills them at maximum speed.
-          You rarely need to change the way the histogram is filled, but you likely
-          want to iterate the range and binning of the axis after seeing the data.
-          With <a href="../../../libs/python/index.html" target="_top">Boost.Python</a> it
-          is easy to set this up.
-        </p>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-            The histogram instance passes the language barrier without copying its
-            internal (possibly large) data buffer.
-          </p></td></tr>
-</table></div>
-<p>
-          Here is an example, consisting of a C++ part, which needs be compiled as
-          a shared library and linked against Boost.Python, and a Python script which
-          includes the histogram module.
-        </p>
-<p>
-          C++ code that is compiled into a shared library.
-        </p>
-<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">histogram</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
-<span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">python</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
-
-<span class="keyword">namespace</span> <span class="identifier">bh</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">;</span>
-<span class="keyword">namespace</span> <span class="identifier">bp</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">python</span><span class="special">;</span>
-
-<span class="comment">// function that runs in C++ and accepts reference to dynamic histogram</span>
-<span class="keyword">void</span> <span class="identifier">process</span><span class="special">(</span><span class="identifier">bh</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">&lt;&gt;&amp;</span> <span class="identifier">h</span><span class="special">)</span> <span class="special">{</span>
-  <span class="comment">// fill histogram, in reality this would be arbitrarily complex code</span>
-  <span class="keyword">for</span> <span class="special">(</span><span class="keyword">int</span> <span class="identifier">i</span> <span class="special">=</span> <span class="number">0</span><span class="special">;</span> <span class="identifier">i</span> <span class="special">&lt;</span> <span class="number">4</span><span class="special">;</span> <span class="special">++</span><span class="identifier">i</span><span class="special">)</span> <span class="identifier">h</span><span class="special">(</span><span class="number">0.25</span> <span class="special">*</span> <span class="identifier">i</span><span class="special">,</span> <span class="identifier">i</span><span class="special">);</span>
-<span class="special">}</span>
-
-<span class="comment">// a minimal Python module, which exposes the process function to Python</span>
-<span class="identifier">BOOST_PYTHON_MODULE</span><span class="special">(</span><span class="identifier">cpp_filler</span><span class="special">)</span> <span class="special">{</span> <span class="identifier">bp</span><span class="special">::</span><span class="identifier">def</span><span class="special">(</span><span class="string">"process"</span><span class="special">,</span> <span class="identifier">process</span><span class="special">);</span> <span class="special">}</span>
-</pre>
-<p>
-          Python script which uses the shared library.
-        </p>
-<pre class="programlisting"><span class="keyword">import</span> <span class="identifier">histogram</span> <span class="keyword">as</span> <span class="identifier">bh</span>
-<span class="keyword">import</span> <span class="identifier">cpp_filler</span>
-
-<span class="identifier">h</span> <span class="special">=</span> <span class="identifier">bh</span><span class="special">.</span><span class="identifier">histogram</span><span class="special">(</span><span class="identifier">bh</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">regular</span><span class="special">(</span><span class="number">4</span><span class="special">,</span> <span class="number">0</span><span class="special">,</span> <span class="number">1</span><span class="special">),</span>
-                 <span class="identifier">bh</span><span class="special">.</span><span class="identifier">axis</span><span class="special">.</span><span class="identifier">integer</span><span class="special">(</span><span class="number">0</span><span class="special">,</span> <span class="number">4</span><span class="special">))</span>
-
-<span class="identifier">cpp_filler</span><span class="special">.</span><span class="identifier">process</span><span class="special">(</span><span class="identifier">h</span><span class="special">)</span>  <span class="comment"># histogram is filled with input values in C++</span>
-
-<span class="keyword">for</span> <span class="identifier">iy</span><span class="special">,</span> <span class="identifier">y</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">1</span><span class="special">)):</span>
-    <span class="keyword">for</span> <span class="identifier">ix</span><span class="special">,</span> <span class="identifier">x</span> <span class="keyword">in</span> <span class="identifier">enumerate</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">axis</span><span class="special">(</span><span class="number">0</span><span class="special">)):</span>
-        <span class="keyword">print</span><span class="special">(</span><span class="identifier">h</span><span class="special">.</span><span class="identifier">at</span><span class="special">(</span><span class="identifier">ix</span><span class="special">,</span> <span class="identifier">iy</span><span class="special">).</span><span class="identifier">value</span><span class="special">,</span> <span class="identifier">end</span><span class="special">=</span><span class="string">' '</span><span class="special">)</span>
-    <span class="keyword">print</span><span class="special">()</span>
-
-<span class="comment"># prints:</span>
-<span class="comment"># 1.0 0.0 0.0 0.0</span>
-<span class="comment"># 0.0 1.0 0.0 0.0</span>
-<span class="comment"># 0.0 0.0 1.0 0.0</span>
-<span class="comment"># 0.0 0.0 0.0 1.0</span>
-</pre>
-</div>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
@@ -1256,16 +881,6 @@
   */</span>
 <span class="special">}</span>
 </pre>
-<div class="note"><table border="0" summary="Note">
-<tr>
-<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
-<th align="left">Note</th>
-</tr>
-<tr><td align="left" valign="top"><p>
-            The axis types available in Python cannot be changed without changing
-            library code and recompiling the library.
-          </p></td></tr>
-</table></div>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h4 class="title">
@@ -1274,12 +889,12 @@
 </h4></div></div></div>
 <p>
           Histograms can be created with a different storage policy than the default
-          <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">adaptive_storage</a></code>,
+          <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">adaptive_storage</a></code>,
           using the templated factories <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_static_histogram_with">make_static_histogram_with</a></code>
-          and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm451337788208">make_dynamic_histogram_with</a></code>.
+          and <code class="computeroutput"><a class="link" href="reference.html#boost.histogram.make_dynam_idm499186007120">make_dynamic_histogram_with</a></code>.
         </p>
 <p>
-          A simple alternative, <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">array_storage</a></code>,
+          A simple alternative, <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">array_storage</a></code>,
           is included in the library. It does not do dynamic counter management,
           instead it is templated and lets the user statically choose the counter
           type, which stores the count per bin. Usually, this would be an integral
@@ -1288,10 +903,10 @@
           (but it can be slower as well, just try it out and measure).
         </p>
 <p>
-          If you work exclusively with weighted fills, <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">array_storage</a></code>
-          will be faster than <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">adaptive_storage</a></code>.
+          If you work exclusively with weighted fills, <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">array_storage</a></code>
+          will be faster than <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">adaptive_storage</a></code>.
           If you want to have a variance estimate for weighted fills, use <code class="computeroutput"><a class="link" href="../boost/histogram/weight_counter.html" title="Class template weight_counter">weight_counter</a></code> as the
-          template argument for <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Class template array_storage">array_storage</a></code>.
+          template argument for <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">array_storage</a></code>.
         </p>
 <p>
           Here is an example of a histogram construced with an alternative storage
@@ -1317,7 +932,7 @@
 </tr>
 <tr><td align="left" valign="top"><p>
             The guarantees regarding protection against overflow and count capping
-            are only valid, if the default <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Class template adaptive_storage">adaptive_storage</a></code>
+            are only valid, if the default <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">adaptive_storage</a></code>
             is used. If you change the storage policy, you need know what you are
             doing.
           </p></td></tr>

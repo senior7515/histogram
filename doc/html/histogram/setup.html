@@ -47,10 +47,6 @@ make
         Do <code class="computeroutput">make test</code> to run the tests, or <code class="computeroutput">ctest -V</code> for
         more output.
       </p>
-<p>
-        To install the python module, move <code class="computeroutput">histogram.so</code> into a path
-        that is accessible to Python.
-      </p>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
@@ -62,22 +58,11 @@ make
 <pre class="programlisting">git clone https://github.com/HDembinski/histogram.git
 mv histogram $BOOST_ROOT/libs
 cd $BOOST_ROOT
-b2 headers # for the header-only part
-b2 --with-python # for the Python bindings
+b2 libs/histogram/test # build and run the tests
 </pre>
 <p>
-        Only the Python bindings need building, the rest of the library is header
-        only.
+        Only the tests need building, the rest of the library is header only.
       </p>
-<p>
-        If the build fails, try to add these lines to your <code class="computeroutput">user-config.jam</code>,
-        which turn on C++11 support and increase the stack size for template recursion.
-      </p>
-<pre class="programlisting">import toolset : using ;
-using python ;
-using gcc : c++11 : "g++" : &lt;cxxflags&gt;-std=c++11 &lt;cxxflags&gt;-ftemplate-depth=500 ;
-using clang : c++11 : "clang++" : &lt;cxxflags&gt;-std=c++11 ;
-</pre>
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>

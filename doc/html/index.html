@@ -50,16 +50,17 @@
       and use a static 1d-histogram in C++</a></span></dt>
 <dt><span class="section"><a href="histogram/getting_started.html#histogram.getting_started.make_and_use_a_dynamic_3d_histog">Make
       and use a dynamic 3d-histogram in C++</a></span></dt>
-<dt><span class="section"><a href="histogram/getting_started.html#histogram.getting_started.make_and_use_a_2d_histogram_in_p">Make
-      and use a 2d-histogram in Python</a></span></dt>
-<dt><span class="section"><a href="histogram/getting_started.html#histogram.getting_started.make_and_use_a_1d_histogram_in_p">Make
-      and use a 1d-histogram in Python without Numpy</a></span></dt>
 </dl></dd>
 <dt><span class="section"><a href="histogram/guide.html">User guide</a></span></dt>
 <dd><dl>
 <dt><span class="section"><a href="histogram/guide.html#histogram.guide.introduction">Introduction</a></span></dt>
-<dt><span class="section"><a href="histogram/guide.html#histogram.guide.cpp">C++ usage</a></span></dt>
-<dt><span class="section"><a href="histogram/guide.html#histogram.guide.python">Python usage</a></span></dt>
+<dt><span class="section"><a href="histogram/guide.html#histogram.guide.create_a_histogram">Create a histogram</a></span></dt>
+<dt><span class="section"><a href="histogram/guide.html#histogram.guide.fill_histogram">Fill histogram</a></span></dt>
+<dt><span class="section"><a href="histogram/guide.html#histogram.guide.access_bin_counts">Access bin counts</a></span></dt>
+<dt><span class="section"><a href="histogram/guide.html#histogram.guide.arithmetic_operators">Arithmetic operators</a></span></dt>
+<dt><span class="section"><a href="histogram/guide.html#histogram.guide.reductions">Reductions</a></span></dt>
+<dt><span class="section"><a href="histogram/guide.html#histogram.guide.streaming">Streaming</a></span></dt>
+<dt><span class="section"><a href="histogram/guide.html#histogram.guide.serialization">Serialization</a></span></dt>
 <dt><span class="section"><a href="histogram/guide.html#histogram.guide.expert">Advanced usage</a></span></dt>
 </dl></dd>
 <dt><span class="section"><a href="histogram/benchmarks.html">Benchmarks</a></span></dt>
@@ -86,13 +87,14 @@
 </dl></dd>
 <dt><span class="section"><a href="histogram/reference.html">Reference</a></span></dt>
 <dd><dl>
+<dt><span class="section"><a href="histogram/reference.html#header.boost.histogram_hpp">Header &lt;boost/histogram.hpp&gt;</a></span></dt>
+<dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.histogram_hpp">Header &lt;boost/histogram/histogram.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.arithmetic_operators_hpp">Header &lt;boost/histogram/arithmetic_operators.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.axis.any_hpp">Header &lt;boost/histogram/axis/any.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.axis.base_hpp">Header &lt;boost/histogram/axis/base.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.axis.interval_view_hpp">Header &lt;boost/histogram/axis/interval_view.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.axis.types_hpp">Header &lt;boost/histogram/axis/types.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.axis.value_view_hpp">Header &lt;boost/histogram/axis/value_view.hpp&gt;</a></span></dt>
-<dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.histogram_hpp">Header &lt;boost/histogram/histogram.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.histogram_fwd_hpp">Header &lt;boost/histogram/histogram_fwd.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.iterator_hpp">Header &lt;boost/histogram/iterator.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="histogram/reference.html#header.boost.histogram.axis.iterator_hpp">Header &lt;boost/histogram/axis/iterator.hpp&gt;</a></span></dt>
@@ -112,7 +114,7 @@
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
-<td align="left"><p><small>Last revised: August 24, 2018 at 09:31:12 GMT</small></p></td>
+<td align="left"><p><small>Last revised: September 15, 2018 at 23:36:31 GMT</small></p></td>
 <td align="right"><div class="copyright-footer"></div></td>
 </tr></table>
 <hr>
