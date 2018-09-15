@@ -4,13 +4,14 @@
 // (See accompanying file LICENSE_1_0.txt
 // or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef BOOST_HISTOGRAM_SERIALIZATION_HPP_
-#define BOOST_HISTOGRAM_SERIALIZATION_HPP_
+#ifndef BOOST_HISTOGRAM_SERIALIZATION_HPP
+#define BOOST_HISTOGRAM_SERIALIZATION_HPP
 
 #include <boost/container/string.hpp>
 #include <boost/histogram/axis/any.hpp>
 #include <boost/histogram/axis/base.hpp>
 #include <boost/histogram/axis/types.hpp>
+#include <boost/histogram/detail/buffer.hpp>
 #include <boost/histogram/detail/meta.hpp>
 #include <boost/histogram/histogram.hpp>
 #include <boost/histogram/storage/adaptive_storage.hpp>
@@ -43,7 +44,10 @@ struct serialize_t {
 struct serializer {
   template <typename T, typename Buffer, typename Archive>
   void operator()(T*, Buffer& b, Archive& ar) {
-    if (Archive::is_loading::value) { create(type_tag<T>(), b); }
+    if (Archive::is_loading::value) {
+      // precondition: buffer is destroyed
+      b.set(b.template create<T>());
+    }
     ar& boost::serialization::make_array(reinterpret_cast<T*>(b.ptr), b.size);
   }
 
@@ -57,27 +61,23 @@ struct serializer {
 
 template <typename RealType>
 template <class Archive>
-void weight_counter<RealType>::serialize(Archive& ar,
-                                         unsigned /* version */) {
+void weight_counter<RealType>::serialize(Archive& ar, unsigned /* version */) {
   ar& w;
   ar& w2;
 }
 
 template <class Archive, typename T, typename A>
-void serialize(Archive& ar, array_storage<T, A>& store,
-               unsigned /* version */) {
-  ar& store.array_;
+void serialize(Archive& ar, array_storage<T, A>& s, unsigned /* version */) {
+  ar& s.buffer;
 }
 
-template <typename A>
-template <class Archive>
-void adaptive_storage<A>::serialize(Archive& ar, unsigned /* version */) {
-  if (Archive::is_loading::value) {
-    detail::apply(detail::destroyer(), buffer_);
-  }
-  ar& buffer_.type;
-  ar& buffer_.size;
-  detail::apply(detail::serializer(), buffer_, ar);
+template <class Archive, typename A>
+void serialize(Archive& ar, adaptive_storage<A>& s, unsigned /* version */) {
+  using S = adaptive_storage<A>;
+  if (Archive::is_loading::value) { S::apply(typename S::destroyer(), s.buffer); }
+  ar& s.buffer.type;
+  ar& s.buffer.size;
+  S::apply(detail::serializer(), s.buffer, ar);
 }
 
 namespace axis {
@@ -125,20 +125,13 @@ void circular<T, A>::serialize(Archive& ar, unsigned /* version */) {
 template <typename T, typename A>
 template <class Archive>
 void variable<T, A>::serialize(Archive& ar, unsigned /* version */) {
-  if (Archive::is_loading::value) {
-    this->~variable();
-  }
+  if (Archive::is_loading::value) { this->~variable(); }
 
   ar& boost::serialization::base_object<labeled_base<A>>(*this);
 
   if (Archive::is_loading::value) {
     value_allocator_type a(base_type::get_allocator());
-    using AT = std::allocator_traits<value_allocator_type>;
-    x_ = AT::allocate(a, base_type::size() + 1);
-    auto xit = x_;
-    const auto xend = x_ + base_type::size() + 1;
-    while (xit != xend)
-      AT::construct(a, xit++);
+    x_ = boost::histogram::detail::create_buffer(a, nx());
   }
 
   ar& boost::serialization::make_array(x_, base_type::size() + 1);
@@ -154,20 +147,13 @@ void integer<T, A>::serialize(Archive& ar, unsigned /* version */) {
 template <typename T, typename A>
 template <class Archive>
 void category<T, A>::serialize(Archive& ar, unsigned /* version */) {
-  if (Archive::is_loading::value) {
-    this->~category();
-  }
+  if (Archive::is_loading::value) { this->~category(); }
 
   ar& boost::serialization::base_object<labeled_base<A>>(*this);
 
   if (Archive::is_loading::value) {
     value_allocator_type a(base_type::get_allocator());
-    using AT = std::allocator_traits<value_allocator_type>;
-    x_ = AT::allocate(a, base_type::size());
-    auto xit = x_;
-    const auto xend = x_ + base_type::size();
-    while (xit != xend)
-      AT::construct(a, xit++);
+    x_ = boost::histogram::detail::create_buffer(a, nx());
   }
 
   ar& boost::serialization::make_array(x_, base_type::size());

@@ -4,8 +4,8 @@
 // (See accompanying file LICENSE_1_0.txt
 // or copy at http://www.boost.org/LICENSE_1_0.txt)
 
-#ifndef _BOOST_HISTOGRAM_WEIGHT_HPP_
-#define _BOOST_HISTOGRAM_WEIGHT_HPP_
+#ifndef BOOST_HISTOGRAM_WEIGHT_HPP
+#define BOOST_HISTOGRAM_WEIGHT_HPP
 
 namespace boost {
 namespace histogram {
@@ -21,11 +21,13 @@ struct sample_type {
 };
 } // namespace detail
 
+/// Helper function to mark argument as a weight
 template <typename T>
 detail::weight_type<T> weight(T&& t) {
   return {t};
 }
 
+/// Helper function to mark argument as a sample
 template <typename T>
 detail::sample_type<T> sample(T&& t) {
   return {t};

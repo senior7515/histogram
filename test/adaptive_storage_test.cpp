@@ -5,22 +5,18 @@
 // or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 #include <boost/core/lightweight_test.hpp>
-#ifndef BOOST_HISTOGRAM_NO_SERIALIZATION
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-#include <boost/histogram/serialization.hpp>
-#endif
-#include <boost/histogram/histogram_fwd.hpp>
 #include <boost/histogram/storage/adaptive_storage.hpp>
 #include <boost/histogram/storage/array_storage.hpp>
 #include <boost/histogram/storage/operators.hpp>
 #include <limits>
 #include <memory>
 #include <sstream>
+#include <memory>
 
-using adaptive_storage_type = boost::histogram::adaptive_storage<>;
-
-using namespace boost::histogram;
+namespace bh = boost::histogram;
+using adaptive_storage_type = bh::adaptive_storage<std::allocator<char>>;
+template <typename T> using array_storage = bh::array_storage<T, T, std::allocator<T>>;
+using bh::weight;
 
 template <typename T>
 adaptive_storage_type prepare(std::size_t n, const T x) {
@@ -52,50 +48,6 @@ void copy_impl() {
   a = b;
   BOOST_TEST(a == b);
 }
-
-#ifndef BOOST_HISTOGRAM_NO_SERIALIZATION
-template <typename T>
-void serialization_impl() {
-  const auto a = prepare(1, T(1));
-  std::ostringstream os;
-  std::string buf;
-  {
-    std::ostringstream os;
-    boost::archive::text_oarchive oa(os);
-    oa << a;
-    buf = os.str();
-  }
-  adaptive_storage_type b;
-  BOOST_TEST(!(a == b));
-  {
-    std::istringstream is(buf);
-    boost::archive::text_iarchive ia(is);
-    ia >> b;
-  }
-  BOOST_TEST(a == b);
-}
-
-template <>
-void serialization_impl<void>() {
-  const auto a = prepare<void>(1);
-  std::ostringstream os;
-  std::string buf;
-  {
-    std::ostringstream os2;
-    boost::archive::text_oarchive oa(os2);
-    oa << a;
-    buf = os2.str();
-  }
-  adaptive_storage_type b;
-  BOOST_TEST(!(a == b));
-  {
-    std::istringstream is(buf);
-    boost::archive::text_iarchive ia(is);
-    ia >> b;
-  }
-  BOOST_TEST(a == b);
-}
-#endif
 
 template <typename T>
 void equal_impl() {
@@ -283,30 +235,30 @@ void add_impl_all_rhs() {
   add_impl<LHS, uint16_t>();
   add_impl<LHS, uint32_t>();
   add_impl<LHS, uint64_t>();
-  add_impl<LHS, detail::mp_int>();
-  add_impl<LHS, detail::wcount>();
+  add_impl<LHS, adaptive_storage_type::mp_int>();
+  add_impl<LHS, adaptive_storage_type::wcount>();
 }
 
 int main() {
   // low-level tools
   {
     uint8_t c = 0;
-    BOOST_TEST_EQ(detail::safe_increase(c), true);
+    BOOST_TEST_EQ(bh::detail::safe_increase(c), true);
     BOOST_TEST_EQ(c, 1);
     c = 255;
-    BOOST_TEST_EQ(detail::safe_increase(c), false);
+    BOOST_TEST_EQ(bh::detail::safe_increase(c), false);
     BOOST_TEST_EQ(c, 255);
-    BOOST_TEST_EQ(detail::safe_assign(c, 255), true);
-    BOOST_TEST_EQ(detail::safe_assign(c, 256), false);
+    BOOST_TEST_EQ(bh::detail::safe_assign(c, 255), true);
+    BOOST_TEST_EQ(bh::detail::safe_assign(c, 256), false);
     BOOST_TEST_EQ(c, 255);
     c = 0;
-    BOOST_TEST_EQ(detail::safe_radd(c, 255), true);
+    BOOST_TEST_EQ(bh::detail::safe_radd(c, 255), true);
     BOOST_TEST_EQ(c, 255);
     c = 1;
-    BOOST_TEST_EQ(detail::safe_radd(c, 255), false);
+    BOOST_TEST_EQ(bh::detail::safe_radd(c, 255), false);
     BOOST_TEST_EQ(c, 1);
     c = 255;
-    BOOST_TEST_EQ(detail::safe_radd(c, 1), false);
+    BOOST_TEST_EQ(bh::detail::safe_radd(c, 1), false);
     BOOST_TEST_EQ(c, 255);
   }
 
@@ -318,13 +270,13 @@ int main() {
 
   // copy
   {
-    copy_impl<detail::wcount>();
+    copy_impl<adaptive_storage_type::wcount>();
     copy_impl<void>();
     copy_impl<uint8_t>();
     copy_impl<uint16_t>();
     copy_impl<uint32_t>();
     copy_impl<uint64_t>();
-    copy_impl<detail::mp_int>();
+    copy_impl<adaptive_storage_type::mp_int>();
   }
 
   // equal_operator
@@ -334,8 +286,8 @@ int main() {
     equal_impl<uint16_t>();
     equal_impl<uint32_t>();
     equal_impl<uint64_t>();
-    equal_impl<detail::mp_int>();
-    equal_impl<detail::wcount>();
+    equal_impl<adaptive_storage_type::mp_int>();
+    equal_impl<adaptive_storage_type::wcount>();
   }
 
   // increase_and_grow
@@ -347,7 +299,7 @@ int main() {
     increase_and_grow_impl<uint64_t>();
 
     // only increase for mp_int
-    auto a = prepare<detail::mp_int>(2, 1);
+    auto a = prepare<adaptive_storage_type::mp_int>(2, 1);
     BOOST_TEST_EQ(a[0].value(), 1);
     BOOST_TEST_EQ(a[1].value(), 0);
     a.increase(0);
@@ -362,8 +314,8 @@ int main() {
     add_impl_all_rhs<uint16_t>();
     add_impl_all_rhs<uint32_t>();
     add_impl_all_rhs<uint64_t>();
-    add_impl_all_rhs<detail::mp_int>();
-    add_impl_all_rhs<detail::wcount>();
+    add_impl_all_rhs<adaptive_storage_type::mp_int>();
+    add_impl_all_rhs<adaptive_storage_type::wcount>();
   }
 
   // add_and_grow
@@ -429,22 +381,9 @@ int main() {
     convert_array_storage_impl<uint16_t>();
     convert_array_storage_impl<uint32_t>();
     convert_array_storage_impl<uint64_t>();
-    convert_array_storage_impl<detail::mp_int>();
-    convert_array_storage_impl<detail::wcount>();
+    convert_array_storage_impl<adaptive_storage_type::mp_int>();
+    convert_array_storage_impl<adaptive_storage_type::wcount>();
   }
-
-#ifndef BOOST_HISTOGRAM_NO_SERIALIZATION
-  // serialization_test
-  {
-    serialization_impl<void>();
-    serialization_impl<uint8_t>();
-    serialization_impl<uint16_t>();
-    serialization_impl<uint32_t>();
-    serialization_impl<uint64_t>();
-    serialization_impl<detail::mp_int>();
-    serialization_impl<detail::wcount>();
-  }
-#endif
 
   return boost::report_errors();
 }
