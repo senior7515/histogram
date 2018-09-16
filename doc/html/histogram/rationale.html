@@ -30,9 +30,6 @@
 <dt><span class="section"><a href="rationale.html#histogram.rationale.philosophy_and_principles">Philosophy
       and principles</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.structure">Structure</a></span></dt>
-<dt><span class="section"><a href="rationale.html#histogram.rationale.histogram_host">Histogram host class</a></span></dt>
-<dt><span class="section"><a href="rationale.html#histogram.rationale.axis_types">Axis types</a></span></dt>
-<dt><span class="section"><a href="rationale.html#histogram.rationale.storage_types">Storage types</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.uoflow">Under- and overflow bins</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.variance">Variance estimates</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.weights">Support of weighted fills</a></span></dt>
@@ -40,6 +37,8 @@
 <dt><span class="section"><a href="rationale.html#histogram.rationale.serialization">Serialization</a></span></dt>
 <dt><span class="section"><a href="rationale.html#histogram.rationale.comparison_to_boost_accumulators">Comparison
       to Boost.Accumulators</a></span></dt>
+<dt><span class="section"><a href="rationale.html#histogram.rationale.why_is_boost_histogram_not_build">Why
+      is Boost.Histogram not build on top of Boost.MultiArray?</a></span></dt>
 </dl></div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
@@ -89,207 +88,238 @@
 <div class="titlepage"><div><div><h3 class="title">
 <a name="histogram.rationale.structure"></a><a class="link" href="rationale.html#histogram.rationale.structure" title="Structure">Structure</a>
 </h3></div></div></div>
+<div class="toc"><dl class="toc">
+<dt><span class="section"><a href="rationale.html#histogram.rationale.structure.histogram_host">Histogram
+        host class</a></span></dt>
+<dt><span class="section"><a href="rationale.html#histogram.rationale.structure.axis_types">Axis types</a></span></dt>
+<dt><span class="section"><a href="rationale.html#histogram.rationale.structure.storage_types">Storage
+        types</a></span></dt>
+</dl></div>
 <p>
         The library consists of three orthogonal components:
       </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-            <a class="link" href="rationale.html#histogram.rationale.histogram_host" title="Histogram host class">histogram host class</a>:
-            The histogram host class defines the public user interface and holds
-            axis objects (one for each dimension) and a storage object. The user
-            can chose whether axis objects are stored in a static tuple or a dynamic
-            vector.
+            <a class="link" href="rationale.html#histogram.rationale.structure.histogram_host" title="Histogram host class">histogram
+            host class</a>: The histogram host class defines the public user interface
+            and holds axis objects (one for each dimension) and a storage object.
+            The user can chose whether axis objects are stored in a static tuple
+            or a dynamic vector.
           </li>
 <li class="listitem">
-            <a class="link" href="rationale.html#histogram.rationale.axis_types" title="Axis types">axis types</a>: Defines
-            how input values are mapped to bins. Several axis types are provided
+            <a class="link" href="rationale.html#histogram.rationale.structure.axis_types" title="Axis types">axis types</a>:
+            Defines how input values are mapped to bins. Several axis types are provided
             which implement different specializations. Users can make their own axis
             types following the axis concept and use them with the library.
           </li>
 <li class="listitem">
-            <a class="link" href="rationale.html#histogram.rationale.storage_types" title="Storage types">storage types</a>:
+            <a class="link" href="rationale.html#histogram.rationale.structure.storage_types" title="Storage types">storage types</a>:
             Manages a collection of bin counters. The requirements for a storage
             differ from those of an STL container, it needs to follow the storage
             concept. Two implementations are provided.
           </li>
 </ul></div>
-</div>
 <div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="histogram.rationale.histogram_host"></a><a class="link" href="rationale.html#histogram.rationale.histogram_host" title="Histogram host class">Histogram host class</a>
-</h3></div></div></div>
+<div class="titlepage"><div><div><h4 class="title">
+<a name="histogram.rationale.structure.histogram_host"></a><a class="link" href="rationale.html#histogram.rationale.structure.histogram_host" title="Histogram host class">Histogram
+        host class</a>
+</h4></div></div></div>
 <p>
-        Histograms store axis objects and a storage object. A one-dimensional histogram
-        has one axis, a multi-dimensional histogram has several. Each axis maps a
-        value from an input tuple onto an index. The histogram host class combines
-        these indices into a global index that is used to address bin counter in
-        the storage object.
-      </p>
+          Histograms store axis objects and a storage object. A one-dimensional histogram
+          has one axis, a multi-dimensional histogram has several. When you pass
+          an input tuple, say (v1, v2, v3), then the first axis will map v1 onto
+          index i1, the second axis v2 onto i2, and so on, to generate the index
+          tuple (i1, i2, i3). The histogram host class then converts these indices
+          into a linear global index that is used to address bin counter in the storage
+          object.
+        </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
 <td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
 <th align="left">Note</th>
 </tr>
 <tr><td align="left" valign="top"><p>
-          To understand the need for multi-dimensional histograms, think of point
-          coordinates. If all points that you consider lie on a line, you need only
-          one value to describe the point. If all points lie in a plane, you need
-          two values to describe the position. Three values are needed for a point
-          in space. A histogram puts a discrete grid over the line, the plane or
-          the space, and counts how many points lie in each cell of the grid. To
-          reflect a point distribution on a line, a 1d-histogram is sufficient. To
-          do the same in 3d-space, one needs a 3d-histogram.
-        </p></td></tr>
+            To understand the need for multi-dimensional histograms, think of point
+            coordinates. If all points that you consider lie on a line, you need
+            only one value to describe the point. If all points lie in a plane, you
+            need two values to describe the position. Three values are needed for
+            a point in space. A histogram puts a discrete grid over the line, the
+            plane or the space, and counts how many points lie in each cell of the
+            grid. To approximate a point distribution on a line, a 1d-histogram is
+            sufficient. To do the same in 3d-space, one needs a 3d-histogram.
+          </p></td></tr>
 </table></div>
 <p>
-        This library supports different axis types, so that the user can customize
-        how the mapping is done exactly, see <a class="link" href="rationale.html#histogram.rationale.axis_types" title="Axis types">axis
-        types</a>. Users can furthermore chose between two ways of storing axis
-        types in the histogram.
-      </p>
+          This library supports different axis types, so that the user can customize
+          how the mapping is done exactly, see <a class="link" href="rationale.html#histogram.rationale.structure.axis_types" title="Axis types">axis
+          types</a>. Users can furthermore chose between two ways of storing axis
+          types in the histogram.
+        </p>
 <p>
-        When the histogram host class is configured to store axis types in a <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">tuple</span></code>,
-        we obtain a static histogram. The number and types of the axes are known
-        at compile-time. Axis access is done with compile-time indices. A static
-        histogram is always faster (see <a class="link" href="benchmarks.html" title="Benchmarks">benchmark</a>),
-        because of type conversions and run-time polymorphism are not needed, and
-        because the compiler can inline more code. Furthermore, user errors are caught
-        at compile-time rather than run-time.
-      </p>
+          When the histogram host class is configured to store axis types in a <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">tuple</span></code>, we obtain a static histogram.
+          The number and types of the axes are known at compile-time. Axis access
+          is done with compile-time indices. A static histogram is always faster
+          (see <a class="link" href="benchmarks.html" title="Benchmarks">benchmark</a>), because there
+          are no type checks and conversions happening at run-time, and because the
+          compiler can inline more code. Furthermore, many user errors are caught
+          at compile-time rather than run-time.
+        </p>
 <p>
-        The static histogram has many advantages, but cannot be used when the axis
-        configuration is only known at run-time. This is the case, for example, when
-        histograms should be created at run-time from Python. Therefore, axis types
-        can also be stored in a generic <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">any</span></code> type,
-        which can be put in a <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span></code>.
-        When the histogram host class is configured to store axis types like this,
-        we obtain a dynamic histogram. The dynamic histogram is a single type that
-        can store arbitrary sequences of axes types, which are generated at runtime.
-        The polymorphic behavior of the generic <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">any</span></code> type
-        has a run-time cost, however.
-      </p>
+          The static histogram is generally preferable, but cannot be used when the
+          axis configuration is only known at run-time. This is the case, for example,
+          when histograms are created at run-time from Python. Therefore, axis types
+          can also be stored in a variant-like <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">any</span></code>
+          type, which can be put in a <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span></code>.
+          When the histogram host class is configured to store axis types like this,
+          we obtain a dynamic histogram. The dynamic histogram is a single type that
+          can store arbitrary sequences of axes types, which are generated at runtime.
+          The polymorphic behavior of the generic <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">any</span></code>
+          type has a run-time cost, however.
+        </p>
+<div class="note"><table border="0" summary="Note">
+<tr>
+<td rowspan="2" align="center" valign="top" width="25"><img alt="[Note]" src="../../../doc/src/images/note.png"></td>
+<th align="left">Note</th>
+</tr>
+<tr><td align="left" valign="top"><p>
+            The design decision to store axis types in the variant-like type <code class="computeroutput"><span class="identifier">boost</span><span class="special">::</span><span class="identifier">histogram</span><span class="special">::</span><span class="identifier">axis</span><span class="special">::</span><span class="identifier">any</span></code> has several advantages over forms
+            of run-time polymorphism based on vtables. Firstly, it guarantees that
+            axis objects are local in memory, which reduces cache misses when the
+            histogram iterates over axis objects in a tight loop, which it often
+            does. Secondly, each axis may accept a different value type. Classic
+            polymorphism with vtables assumes that all overloads provided by derived
+            classes share the same method signature, but that is not the case here.
+            One axis may convert numbers to indices, another strings. The method
+            signatures are different and so classic run-time polymorphism does not
+            work, but variants do.
+          </p></td></tr>
+</table></div>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="histogram.rationale.axis_types"></a><a class="link" href="rationale.html#histogram.rationale.axis_types" title="Axis types">Axis types</a>
-</h3></div></div></div>
+<div class="titlepage"><div><div><h4 class="title">
+<a name="histogram.rationale.structure.axis_types"></a><a class="link" href="rationale.html#histogram.rationale.structure.axis_types" title="Axis types">Axis types</a>
+</h4></div></div></div>
 <p>
-        An axis defines which range of input values is mapped to which bin. The logic
-        is encapsulated in an axis type. Users can create their own axis classes
-        and use them with the library, by providing a class compatible with the
-        <a class="link" href="concepts.html#histogram.concepts.axis" title="Axis type">axis concept</a>. The library
-        comes with five builtin types, which implement different specializations.
-      </p>
+          An axis defines which range of input values is mapped to which bin. The
+          logic is encapsulated in an axis type. Users can create their own axis
+          classes and use them with the library, by providing a class compatible
+          with the <a class="link" href="concepts.html#histogram.concepts.axis" title="Axis type">axis concept</a>. The
+          library comes with five builtin types, which implement different specializations.
+        </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-            <code class="computeroutput"><a class="link" href="../boost/histogram/axis/regular.html" title="Class template regular">boost::histogram::axis::regular</a></code>
-            sorts real numbers into bins with equal width.
-          </li>
+              <code class="computeroutput"><a class="link" href="../boost/histogram/axis/regular.html" title="Class template regular">boost::histogram::axis::regular</a></code>
+              sorts real numbers into bins with equal width.
+            </li>
 <li class="listitem">
-            <code class="computeroutput"><a class="link" href="../boost/histogram/axis/variable.html" title="Class template variable">boost::histogram::axis::variable</a></code>
-            sorts real numbers into bins with varying width.
-          </li>
+              <code class="computeroutput"><a class="link" href="../boost/histogram/axis/variable.html" title="Class template variable">boost::histogram::axis::variable</a></code>
+              sorts real numbers into bins with varying width.
+            </li>
 <li class="listitem">
-            <code class="computeroutput"><a class="link" href="../boost/histogram/axis/circular.html" title="Class template circular">boost::histogram::axis::circular</a></code>
-            is a specialization of a regular axis for angles and similar values defined
-            on a closed circle.
-          </li>
+              <code class="computeroutput"><a class="link" href="../boost/histogram/axis/circular.html" title="Class template circular">boost::histogram::axis::circular</a></code>
+              is a specialization of a regular axis for angles and similar values
+              defined on a closed circle.
+            </li>
 <li class="listitem">
-            <code class="computeroutput"><a class="link" href="../boost/histogram/axis/integer.html" title="Class template integer">boost::histogram::axis::integer</a></code>
-            is a specialization of a regular axis for a range of integers with unit
-            bin width.
-          </li>
+              <code class="computeroutput"><a class="link" href="../boost/histogram/axis/integer.html" title="Class template integer">boost::histogram::axis::integer</a></code>
+              is a specialization of a regular axis for a range of integers with
+              unit bin width.
+            </li>
 <li class="listitem">
-            <code class="computeroutput"><a class="link" href="../boost/histogram/axis/category.html" title="Class template category">boost::histogram::axis::category</a></code>
-            is a one-on-one mapping of a set of unique values onto bins. This can
-            be used to count labels, like "red", "green", "blue".
-          </li>
+              <code class="computeroutput"><a class="link" href="../boost/histogram/axis/category.html" title="Class template category">boost::histogram::axis::category</a></code>
+              is a one-on-one mapping of a set of unique values onto bins. This can
+              be used to count labels, like "red", "green", "blue".
+            </li>
 </ul></div>
 </div>
 <div class="section">
-<div class="titlepage"><div><div><h3 class="title">
-<a name="histogram.rationale.storage_types"></a><a class="link" href="rationale.html#histogram.rationale.storage_types" title="Storage types">Storage types</a>
-</h3></div></div></div>
+<div class="titlepage"><div><div><h4 class="title">
+<a name="histogram.rationale.structure.storage_types"></a><a class="link" href="rationale.html#histogram.rationale.structure.storage_types" title="Storage types">Storage
+        types</a>
+</h4></div></div></div>
 <p>
-        A storage type stores the actual bin counters. It uses a one-dimensional
-        index for lookup, computed by the histogram host from the indices generated
-        from all its axes. The storage needs to know nothing about axes. Users can
-        integrate their own storage classes with the library, by providing a class
-        compatible with the <a class="link" href="concepts.html#histogram.concepts.storage" title="Storage type">storage concept</a>.
-      </p>
+          A storage type stores the actual bin counters. It uses a one-dimensional
+          index for lookup, computed by the histogram host from the indices generated
+          from all its axes. The storage needs to know nothing about axes. Users
+          can integrate their own storage classes with the library, by providing
+          a class compatible with the <a class="link" href="concepts.html#histogram.concepts.storage" title="Storage type">storage
+          concept</a>.
+        </p>
 <p>
-        The buildin storage types are optimised for fast look-up of the random-access
-        variety and use dense (aka contiguous) storage in memory. Bin lookup is often
-        happening in a tight loop. <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">boost::histogram::array_storage</a></code>
-        implements a simple storage based on a heap-allocated array of a static counter
-        type. That could be the end of story, but there are some issues with this
-        approach. It is not convenient, because the user has to decide what type
-        to use to hold the bin counts and it is not an obvious choice. An integer
-        type needs to be large enough to avoid counter overflow, but only a fraction
-        of the bits are used if it is too large. Using an integral type that is too
-        large is a waste of memory. This is still a concern today since the performance
-        of modern CPUs depends on effective utilization of the CPU cache, which is
-        small. Using floating point numbers instead of integers is also dangerous.
-        They don't overflow, but cap the bin count when the bits in the mantissa
-        are used up.
-      </p>
+          The buildin storage types are optimised for fast look-up of the random-access
+          variety and use dense (aka contiguous) storage in memory. Bin lookup is
+          often happening in a tight loop. <code class="computeroutput"><a class="link" href="../boost/histogram/array_storage.html" title="Struct template array_storage">boost::histogram::array_storage</a></code>
+          implements a simple storage based on a heap-allocated array of a static
+          counter type. That could be the end of story, but there are some issues
+          with this approach. It is not convenient, because the user has to decide
+          what type to use to hold the bin counts and it is not an obvious choice.
+          An integer type needs to be large enough to avoid counter overflow, but
+          only a fraction of the bits are used if it is too large. Using an integral
+          type that is too large is a waste of memory. This is still a concern today
+          since the performance of modern CPUs depends on effective utilization of
+          the CPU cache, which is small. Using floating point numbers instead of
+          integers is also dangerous. They don't overflow, but cap the bin count
+          when the bits in the mantissa are used up.
+        </p>
 <p>
-        The standard storage used in the library is <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">boost::histogram::adaptive_storage</a></code>.
-        It solves these issues with a dynamic counter type management, based on the
-        following insight. The <a href="https://en.wikipedia.org/wiki/Curse_of_dimensionality" target="_top">curse
-        of dimensionality</a> makes the total number of bins grow very fast as
-        the dimension of the histogram grows. However, having many bins also reduces
-        the number of counts per bin, since the input values are spread over many
-        more bins now.
-      </p>
+          The standard storage used in the library is <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">boost::histogram::adaptive_storage</a></code>.
+          It solves these issues with a dynamic counter type management, based on
+          the following insight. The <a href="https://en.wikipedia.org/wiki/Curse_of_dimensionality" target="_top">curse
+          of dimensionality</a> makes the total number of bins grow very fast
+          as the dimension of the histogram grows. However, having many bins also
+          reduces the number of counts per bin, since the input values are spread
+          over many more bins now.
+        </p>
 <p>
-        We therefore start with a minimum amount of memory per bin counter by using
-        the smallest integer type to hold a count. If the bin counter is about to
-        overflow, we switch to the next larger integer type. We start with 1 byte
-        per bin counter and then double the size as needed, until 8 byte per bin
-        are reached. The following images illustrate this progression for a storage
-        of 3 bin counters. A new memory block is always allocated for all counters,
-        when the first one of them hits its capacity limit.
-      </p>
+          We therefore start with a minimum amount of memory per bin counter by using
+          the smallest integer type to hold a count. If the bin counter is about
+          to overflow, we switch to the next larger integer type. We start with 1
+          byte per bin counter and then double the size as needed, until 8 byte per
+          bin are reached. The following images illustrate this progression for a
+          storage of 3 bin counters. A new memory block is always allocated for all
+          counters, when the first one of them hits its capacity limit.
+        </p>
 <p>
-        <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint8.svg" width="65" height="23"></object></span>
-      </p>
+          <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint8.svg" width="65" height="23"></object></span>
+        </p>
 <p>
-        <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint16.svg" width="129" height="23"></object></span>
-      </p>
+          <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint16.svg" width="129" height="23"></object></span>
+        </p>
 <p>
-        <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint32.svg" width="256" height="23"></object></span>
-      </p>
+          <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint32.svg" width="256" height="23"></object></span>
+        </p>
 <p>
-        <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint64.svg" width="511" height="23"></object></span>
-      </p>
+          <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_uint64.svg" width="511" height="23"></object></span>
+        </p>
 <p>
-        When even that is not enough, we switch to the <a href="../../../libs/multiprecision/index.html" target="_top">Boost.Multiprecision</a>
-        type <code class="computeroutput"><span class="identifier">cpp_int</span></code>, whose capacity
-        is limited only by available memory. The following image is not to scale:
-      </p>
+          When even that is not enough, we switch to the <a href="../../../libs/multiprecision/index.html" target="_top">Boost.Multiprecision</a>
+          type <code class="computeroutput"><span class="identifier">cpp_int</span></code>, whose capacity
+          is limited only by available memory. The following image is not to scale:
+        </p>
 <p>
-        <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_cpp_int.svg" width="511" height="23"></object></span>
-      </p>
+          <span class="inlinemediaobject"><object type="image/svg+xml" data="../../storage_3_cpp_int.svg" width="511" height="23"></object></span>
+        </p>
 <p>
-        This approach is not only memory conserving, but also allows us to give the
-        strong guarantee that bin counters cannot overflow.
-      </p>
+          This approach is not only memory conserving, but also allows us to give
+          the strong guarantee that bin counters cannot overflow.
+        </p>
 <p>
-        And now comes the best part: this approach is even faster in the multi-dimensional
-        case despite the run-time overheads of handling the counter type dynamically.
-        The benchmarks show that gains from better cache usage outweigh the run-time
-        overheads of dynamic dispatching to the right bin counter type and the additional
-        allocation costs. Doubling the size of the bin counters each time helps,
-        too, because then allocations happen only O(logN) times for N bin increments.
-      </p>
+          And now comes the best part: this approach is even faster in the multi-dimensional
+          case despite the run-time overheads of handling the counter type dynamically.
+          The benchmarks show that gains from better cache usage outweigh the run-time
+          overheads of dynamic dispatching to the right bin counter type and the
+          additional allocation costs. Doubling the size of the bin counters each
+          time helps, too, because then allocations happen only O(logN) times for
+          N bin increments.
+        </p>
 <p>
-        In a sense, <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">adaptive_storage</a></code>
-        is the opposite of a <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span></code>,
-        which keeps the size of the stored type constant, but grows to hold a larger
-        number of elements. Here, the number of elements remains the same, but the
-        storage grows to hold a uniform collection of larger and larger elements.
-      </p>
+          In a sense, <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">adaptive_storage</a></code>
+          is the opposite of a <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span></code>,
+          which keeps the size of the stored type constant, but grows to hold a larger
+          number of elements. Here, the number of elements remains the same, but
+          the storage grows to hold a uniform collection of larger and larger elements.
+        </p>
+</div>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
@@ -430,11 +460,11 @@
 <p>
         A histogram sorts input values into bins and increments a bin counter if
         an input value falls into the range covered by that bin. The <code class="computeroutput"><a class="link" href="../boost/histogram/adaptive_storage.html" title="Struct template adaptive_storage">standard
-        storage</a></code> uses integer types to store these counts, see the <a class="link" href="rationale.html#histogram.rationale.storage_types" title="Storage types">storage section</a> how integer
-        overflow is avoided. However, sometimes histograms need to be filled with
-        values that have a weight <span class="emphasis"><em>w</em></span> attached to them. In this
-        case, the corresponding bin counter is not increased by one, but by the passed
-        weight <span class="emphasis"><em>w</em></span>.
+        storage</a></code> uses integer types to store these counts, see the <a class="link" href="rationale.html#histogram.rationale.structure.storage_types" title="Storage types">storage section</a>
+        how integer overflow is avoided. However, sometimes histograms need to be
+        filled with values that have a weight <span class="emphasis"><em>w</em></span> attached to
+        them. In this case, the corresponding bin counter is not increased by one,
+        but by the passed weight <span class="emphasis"><em>w</em></span>.
       </p>
 <div class="note"><table border="0" summary="Note">
 <tr>
@@ -569,6 +599,43 @@
 </ul></div>
           </li>
 </ul></div>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="histogram.rationale.why_is_boost_histogram_not_build"></a><a class="link" href="rationale.html#histogram.rationale.why_is_boost_histogram_not_build" title="Why is Boost.Histogram not build on top of Boost.MultiArray?">Why
+      is Boost.Histogram not build on top of Boost.MultiArray?</a>
+</h3></div></div></div>
+<p>
+        Boost.MultiArray implements a multi-dimensional array, it also converts an
+        index tuple into a global index that is used to access an element in the
+        array. Boost.Histogram and Boost.MultiArray share this functionality, but
+        Boost.Histogram cannot use Boost.MultiArray as a backend. Boost.MultiArray
+        does not allow to change the element type dynamically, like it is needed
+        to implement the adaptive storage mentioned further up. Using a variant type
+        as the element type of a Boost.MultiArray would not work, because it creates
+        this wasteful layout:
+      </p>
+<p>
+        <code class="computeroutput"><span class="special">[</span><span class="identifier">type</span><span class="special">-</span><span class="identifier">index</span> <span class="number">1</span><span class="special">][</span><span class="identifier">value</span>
+        <span class="number">1</span><span class="special">][</span><span class="identifier">type</span><span class="special">-</span><span class="identifier">index</span>
+        <span class="number">2</span><span class="special">][</span><span class="identifier">value</span> <span class="number">2</span><span class="special">]...</span></code>
+      </p>
+<p>
+        A type index is stored for each cell. Moreover, the variant is always as
+        large as the largest type in the union, so there is no way to safe memory
+        by using a smaller type when the bin count is low, as it is done by the adaptive
+        storage. The adaptive storage uses only one type-index for the whole array
+        and allocates a homogenous array of values of the same type that exactly
+        matches their sizes, creating the following layout:
+      </p>
+<p>
+        <code class="computeroutput"><span class="special">[</span><span class="identifier">type</span><span class="special">-</span><span class="identifier">index</span><span class="special">][</span><span class="identifier">value</span> <span class="number">1</span><span class="special">][</span><span class="identifier">value</span>
+        <span class="number">2</span><span class="special">][</span><span class="identifier">value</span> <span class="number">3</span><span class="special">]...</span></code>
+      </p>
+<p>
+        There is only one type index and the number of allocated bytes for the array
+        can adapted dynamically to the size of the value type.
+      </p>
 </div>
 <div class="footnotes">
 <br><hr style="width:100; text-align:left;margin-left: 0">
